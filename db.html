@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>卫戍协议 资料库</title>
+<meta name="description" content="明日方舟「卫戍协议·规程」资料库：各难度每回合的敌人、出怪规律（怪组、隐藏分、各回合约出几只）、特训敌人、领袖、装备、策略。玩家自制，非官方。">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23162023'/%3E%3Cpath d='M32 9l19 8v15c0 11-8 19.500-19 23-11-3.500-19-12-19-23V17z' fill='none' stroke='%2335c9a5' stroke-width='5' stroke-linejoin='round'/%3E%3Cpath d='M23 32l7 7 12-14' fill='none' stroke='%2335c9a5' stroke-width='5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<style>
+:root{--bg:#0e1416;--panel:#162023;--panel2:#1d2a2e;--line:#2b3b40;--text:#e6eeee;--dim:#8fa3a6;--accent:#35c9a5;--accent-bg:#12392f;--warn:#ffb020;--bad:#e2625a;
+  --t1:#c5c5c5;--t2:#fff;--t3:#17a589;--t4:#00b0ff;--t5:#ffbb00;--t6:#ff7f00}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--text);font:14px/1.6 "Microsoft YaHei","PingFang SC",system-ui,sans-serif}
+button,select,input{font:inherit;color:inherit}
+header{position:sticky;top:0;z-index:5;background:var(--panel);border-bottom:1px solid var(--line);padding:8px 16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+header h1{font-size:16px;margin:0 8px 0 0;font-weight:600}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tab{padding:5px 12px;border:1px solid var(--line);border-radius:999px;background:var(--panel2);color:var(--dim);cursor:pointer}
+.tab.on{background:var(--accent-bg);border-color:var(--accent);color:var(--accent)}
+a.back{margin-left:auto;color:var(--accent);text-decoration:none;border:1px solid var(--accent);border-radius:6px;padding:4px 12px}
+main{max-width:1100px;margin:0 auto;padding:14px 16px 60px}
+.note{color:var(--dim);font-size:12px}
+.src{color:var(--dim);font-size:12px;margin:0 0 12px}
+select,input[type=search]{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:6px 10px;outline:none}
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.chip{padding:3px 10px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--dim);cursor:pointer;font-size:12px}
+.chip.on{background:var(--accent-bg);border-color:var(--accent);color:var(--accent)}
+.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px;margin-bottom:14px}
+.kv div{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.kv b{display:block;font-size:12px;color:var(--dim);font-weight:400}
+h2{font-size:15px;margin:18px 0 8px}
+.tw{overflow-x:auto;border:1px solid var(--line);border-radius:8px}
+table{border-collapse:collapse;width:100%;min-width:560px}
+th,td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:center;font-variant-numeric:tabular-nums;white-space:nowrap}
+th{background:var(--panel);color:var(--dim);font-weight:400;font-size:12px}
+td.l,th.l{text-align:left;white-space:normal}
+tr.boss td{background:#3a1f1c;color:#ffb9b3}
+tr.dec td:first-child{box-shadow:inset 3px 0 0 var(--warn)}
+.zero{color:#44575b}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.card h3{margin:0 0 4px;font-size:14px;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.tag{font-size:11px;font-weight:400;padding:0 6px;border-radius:4px;border:1px solid var(--line);color:var(--dim);white-space:nowrap}
+.tag.w{color:var(--warn);border-color:var(--warn)} .tag.g{color:var(--accent);border-color:var(--accent)} .tag.r{color:var(--bad);border-color:var(--bad)}
+.tag.t{color:var(--tc);border-color:var(--tc)}
+.card p{margin:4px 0;white-space:pre-wrap}
+.gold{color:var(--t5)}
+.tips{margin:8px 0 2px;padding:6px 8px;border-radius:6px;background:var(--panel2,rgba(255,255,255,.04));border-left:2px solid var(--accent)}
+.tips b{font-size:12px;color:var(--accent)}
+.bimg{width:72px;height:72px;border-radius:8px;object-fit:cover;flex:none;border:1px solid var(--line)}
+.bhd{display:flex;gap:10px;align-items:flex-start}
+.bvids{margin:8px 0 0;padding:6px 8px;border-radius:6px;background:var(--panel2,rgba(255,255,255,.04));border-left:2px solid var(--accent);font-size:13px}
+.bvids b{font-size:12px;color:var(--accent)}
+.bvids a{display:block;color:var(--text);text-decoration:none;margin:3px 0}
+.bvids a:hover{color:var(--accent)}
+.bvids a .k{font-size:11px;color:var(--dim);border:1px solid var(--line);border-radius:4px;padding:0 4px;margin-right:4px}
+.bvids a .w{color:var(--dim);font-size:12px}
+.jgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px}
+.jcard{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+.jcard h3{margin:0 0 6px;font-size:14px}
+.jeq{display:flex;align-items:center;gap:6px;font-size:13px;margin:3px 0}
+.jeq img{width:26px;height:26px;object-fit:contain;border-radius:4px;background:var(--panel2,rgba(255,255,255,.04))}
+.jeq .p{color:var(--dim);font-size:12px}
+.jplus{color:var(--dim);margin:0 2px}
+.jsrc{display:flex;flex-direction:column;gap:3px;margin:0 0 6px 34px;font-size:12px;color:var(--dim)}
+.jsrc .s{display:flex;gap:6px;align-items:flex-start;line-height:1.45}
+.jsrc img{width:22px;height:22px;border-radius:4px;object-fit:cover;flex:none;background:var(--panel2,rgba(255,255,255,.04))}
+.jsrc img.r{border-radius:50%}
+.jsrc b{color:var(--text);font-weight:600}
+.jsrc .shop{color:var(--dim)}
+.eqico{width:28px;height:28px;object-fit:contain;border-radius:4px;background:var(--panel2,rgba(255,255,255,.04))}
+.tips ul{margin:4px 0 0;padding-left:16px}
+.tips li{margin:3px 0;font-size:13px}
+.tips a,.eqrank a,.mech a{color:var(--dim);font-size:12px;text-decoration:none;white-space:nowrap}
+.tips a:hover,.eqrank a:hover,.mech a:hover{color:var(--accent)}
+.eqrank{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;margin:0 0 10px;font-size:13px}
+.eqrank span b{color:var(--accent);font-weight:600;margin-right:4px}
+.mech .mrow{display:flex;gap:10px;border-top:1px solid var(--line);padding:5px 0;font-size:13px}
+.mech .mrow b{flex:0 0 4.5em;font-weight:600}
+ul{margin:4px 0;padding-left:18px}
+li{margin:2px 0}
+details{background:var(--panel);border:1px solid var(--line);border-radius:10px;margin-bottom:8px}
+details>summary{cursor:pointer;padding:10px 12px;font-weight:600;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+details>div{padding:0 12px 12px}
+.en{border-top:1px dashed var(--line);padding:8px 0}
+.en:first-child{border-top:0}
+.en b{margin-right:6px}
+.rules{margin:0 0 4px;padding-left:18px}
+.rules li{margin:4px 0}
+.cards.wide{grid-template-columns:repeat(auto-fill,minmax(380px,1fr))}
+.grp{padding:10px 10px 6px}
+.grp .tw{border:0;border-radius:0}
+.grp table{min-width:0;font-size:13px}
+.grp th,.grp td{padding:4px 5px}
+.grp tr:last-child td{border-bottom:0}
+.grp th.l{white-space:nowrap}
+.grp th:nth-child(n+3){width:8.5%}
+td.sc{color:var(--accent)}
+.src a{color:var(--dim)}
+@media (max-width:640px){ main{padding:10px 10px 50px} .cards,.cards.wide{grid-template-columns:1fr} header{padding:8px 10px} a.back{margin-left:0} .grp th,.grp td{padding:4px 3px} }
+</style>
+</head>
+<body>
+<header>
+  <h1>卫戍协议 · 资料库</h1>
+  <div class="tabs" id="tabs"></div>
+  <a class="back" href="index.html">← 配装器</a>
+  <a class="back" href="index.html#feedback" style="margin-left:0">反馈</a>
+</header>
+<main id="main"></main>
+<script src="gamedb.js?v=63eb5c7e"></script>
+<script src="equip_tips.js?v=04445160"></script>
+<script src="db_extra.js?v=1709e2c6"></script>
+<script src="stats.js?v=936dac51"></script>
+<script>
+(function(){
+"use strict";
+const DB = window.SWEEP_DB;
+const $ = id => document.getElementById(id);
+if(!DB){ $("main").innerHTML = '<p>没找到 gamedb.js，先运行 <code>python build_gamedb.py</code>。</p>'; return; }
+const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const R = ["","Ⅰ","Ⅱ","Ⅲ","Ⅳ","Ⅴ","Ⅵ"];
+const TABS = [["modes","难度与回合"],["spawn","出怪规律"],["enemies","特训敌人"],["bosses","领袖"],["equip","装备"],["jobs","转职合成"],["strats","策略"]];
+const st = {tab: (location.hash || "#modes").slice(1), mode: "mode_multi_hard", eqTier: 0, eqQ: "", eqTip: false, stKind: "", stQ: "", spType: ""};
+if(!TABS.some(t => t[0] === st.tab)) st.tab = "modes";
+const n = v => v ? v : '<span class="zero">·</span>';
+const LVL = {NORMAL: "普通", ELITE: "精英", BOSS: "领袖"};
+
+function modes(){
+  const m = DB.modes.find(x => x.id === st.mode) || DB.modes[0];
+  const grp = t => '<optgroup label="' + t + '">' + DB.modes.filter(x => x.type === t).map(x => '<option value="' + x.id + '"' + (x.id === m.id ? " selected" : "") + '>' + esc(x.name) + '</option>').join("") + '</optgroup>';
+  let total = 0;
+  const rows = m.rounds.map(r => {
+    if(r.boss){ const names = [...new Set(r.bossPool.map(id => { const b = DB.bosses.find(x => x.id === id); return b ? b.name + (b.hidden ? "（隐秘核心）" : "") : id; }))];
+      return '<tr class="boss"><td>' + r.round + '</td><td>' + r.time + ' 秒</td><td colspan="8" class="l">领袖回合，从这些里出一个：' + esc(names.join("、")) + '</td></tr>'; }
+    const s = (r.enemies || {}).slots || {}, f = (r.enemies || {}).fixed || {};
+    const sum = Object.values(s).reduce((a, b) => a + b, 0) + Object.values(f).reduce((a, b) => a + b, 0); total += sum;
+    return '<tr class="' + (r.decision ? "dec" : "") + '"><td>' + r.round + '</td><td>' + r.time + ' 秒</td><td>' + (r.decision ? '<span class="tag w">有决策</span>' : "") + '</td>' +
+      '<td>' + n(s.ground_normal) + '</td><td>' + n(s.ground_elite) + '</td><td>' + n(s.ground_special) + '</td>' +
+      '<td>' + n(s.fly_normal) + '</td><td>' + n(s.fly_elite) + '</td><td>' + n(s.fly_special) + '</td>' +
+      '<td>' + (r.enemies ? sum : "—") + (Object.keys(f).length ? '<div class="note">含 ' + esc(Object.entries(f).map(e => e[0] + "×" + e[1]).join("、")) + '</div>' : "") + '</td></tr>';
+  }).join("");
+  return '<p class="src">' + esc(DB.source) + '。「敌人位」是关卡文件里的占位数量：进场时会被本局抽中的特训敌人类型里的具体敌人替换，所以每局出的怪不一样；一个敌人位换成几只看敌人的隐藏分，见「出怪规律」。</p>' +
+    '<div class="bar"><select id="modeSel">' + grp("联合模拟") + grp("个人模拟") + grp("入门") + '</select></div>' +
+    '<div class="kv"><div><b>类型</b>' + esc(m.type) + ' · ' + esc(m.tier) + '</div><div><b>认证获取效率</b>' + Math.round(m.rewardFactor * 100) + '%</div>' +
+    '<div><b>本局抽几类特训敌人</b>' + m.specialTypes + ' 类（共 9 类）</div><div><b>回合数</b>' + m.rounds.length + '</div>' +
+    '<div><b>开放的盟约</b>' + m.bondsOpen + ' / 26</div></div>' +
+    (m.bondsClosed.length ? '<p><span class="tag r">这个难度固定不开放</span> ' + esc(m.bondsClosed.join("、")) + '</p>' : '<p><span class="tag g">26 个盟约全部开放</span> <span class="note">每局还会再随机禁用一部分，以开局显示为准</span></p>') +
+    (m.enemiesClosed.length ? '<p class="note">这个难度不会出现的敌人（' + m.enemiesClosed.length + ' 种）：' + esc(m.enemiesClosed.join("、")) + '</p>' : "") +
+    (m.desc ? '<p class="note">' + esc(m.desc) + '</p>' : "") +
+    '<h2>每回合的敌人</h2><div class="tw"><table><tr><th rowspan="2">回合</th><th rowspan="2">作战时间</th><th rowspan="2">回合前</th><th colspan="3">地面敌人位</th><th colspan="3">空中敌人位</th><th rowspan="2">合计</th></tr>' +
+    '<tr><th>普通</th><th>精英</th><th>特训</th><th>普通</th><th>精英</th><th>特训</th></tr>' + rows + '</table></div>' +
+    '<p class="note">「有决策」= 这回合开始前有机变 / 悬赏选择。非领袖回合合计 ' + total + ' 个敌人位。</p>' +
+    (m.shop.length ? '<h2>调度中心</h2><div class="tw"><table style="min-width:360px"><tr><th>等级</th><th>升到下一级的初始价格</th><th>每次刷出干员数</th><th>装备数</th></tr>' +
+      m.shop.map(s => '<tr><td>' + R[s.level] + '</td><td>' + (s.upgradePrice >= 99 ? "—" : s.upgradePrice) + '</td><td>' + s.operators + '</td><td>' + s.items + '</td></tr>').join("") + '</table></div>' +
+      '<p class="note">数据里只有升级的初始价格和格子数，没有各阶干员的出现概率。</p>' : "");
+}
+function spawn(){
+  const SP = DB.spawn;
+  if(!SP) return '<p class="note">这一版数据里没有出怪规律。</p>';
+  const m = DB.modes.find(x => x.id === "mode_multi_abyss") || DB.modes[0];
+  const rounds = m.rounds.filter(r => !r.boss && r.enemies);
+  const SLOT = ["ground_normal","ground_elite","ground_special","fly_normal","fly_elite","fly_special"];
+  const pool = (r, k) => ((r.enemies.slots || {})[k] || 0) * SP.slot[k];
+  const halfOf = r => r.round === 1 ? 0 : r.secondHalf ? 2 : 1;
+  const span = h => { const a = rounds.filter(r => halfOf(r) === h).map(r => r.round); return a.length ? "第 " + a[0] + (a.length > 1 ? "–" + a[a.length - 1] : "") + " 回合" : ""; };
+  const HALF = ["固定", "上半场", "下半场"];
+  const bossRounds = m.rounds.filter(r => r.boss).map(r => r.round);
+  const d = SP.draw, c = SP.coef, x = v => v === 1 ? "" : " × " + v;
+  const fill = SP.types.filter(t => t.fill).map(t => "「" + t.name + "」").join("、");
+  const wc = {}; SP.types.forEach(t => t.groups.forEach(g => wc[g.weight] = (wc[g.weight] || 0) + 1));
+  const base = +Object.keys(wc).sort((a, b) => wc[b] - wc[a])[0];
+  const cur = SP.types.find(t => t.id === st.spType) || SP.types[0];
+  // 按波次算：每一波 = 这一波的占位敌人数 × 占位敌人的隐藏分 ÷ 这种敌人的隐藏分，四舍五入后限制在 1–5 只；各波相加
+  const cnt = (r, k, sc) => { const w = (r.enemies.waves || {})[k];
+    return w ? w.reduce((s, c) => s + Math.min(5, Math.max(1, Math.round(c * SP.slot[k] / sc))), 0) : pool(r, k) ? Math.max(1, Math.round(pool(r, k) / sc)) : 0; };
+  const row = (role, e, k, rs) => '<tr><td class="l"><span class="tag">' + role + '</span> ' + esc(e.name) + '</td><td class="sc">' + e.score.toLocaleString() + '</td>' +
+    rs.map(r => '<td>' + n(cnt(r, k, e.score)) + '</td>').join("") + '</tr>';
+  const card = g => { const rs = rounds.filter(r => halfOf(r) === g.half), side = g.fly ? "fly_" : "ground_";
+    return '<div class="card grp"><h3><span class="tag g">' + HALF[g.half] + '</span><span class="note" style="font-weight:400">' + span(g.half) + '</span>' +
+      (g.weight < base ? '<span class="tag w">出现率偏低</span>' : g.weight > base ? '<span class="tag w">出现率偏高</span>' : "") + '</h3>' +
+      '<div class="tw"><table><tr><th class="l">各回合约出几只</th><th>隐藏分</th>' + rs.map(r => '<th>' + r.round + '</th>').join("") + '</tr>' +
+      row("特殊", g.special, side + "special", rs) + g.normal.map(e => row("普通", e, side + "normal", rs)).join("") + g.elite.map(e => row("精锐", e, side + "elite", rs)).join("") +
+      '</table></div></div>'; };
+  return '<ul class="rules">' +
+    '<li>每局抽 ' + d.multi.types + ' 类特训敌人，每类占 ' + d.multi.rounds + ' 个回合（个人模拟抽 ' + d.single.types + ' 类，每类占 ' + d.single.rounds + ' 个回合），剩下的回合出' + fill + '；领袖回合也算在内' + (bossRounds.length ? '，所以前 ' + (bossRounds[0] - 1) + ' 回合里每类出现 ' + (d.multi.rounds - bossRounds.length) + ' 到 ' + d.multi.rounds + ' 次' : "") + '。</li>' +
+    '<li>第 1 回合固定。' + span(1) + '出上半场怪组，' + span(2) + '出下半场怪组' + (bossRounds.length ? '，第 ' + bossRounds.join("、") + ' 回合是领袖' : "") + '。</li>' +
+    '<li>每回合一个怪组，一组 3 种敌人：特殊、普通、精锐。</li>' +
+    '<li>一回合分成几波来出，每一波出几只 = 这一波的分数 ÷ 它的隐藏分，四舍五入，最少 1 只、最多 5 只；地面和空中分开算。</li>' +
+    '<li>隐藏分 =（生命' + x(c.hp) + ' + 攻击' + x(c.atk) + ' + 防御' + x(c.def) + ' + 法抗' + x(c.res) + '）÷ 这种敌人的系数。</li></ul>' +
+    '<h2>每回合的分数池 <span class="tag">' + esc(m.name) + '</span></h2>' +
+    '<div class="tw"><table><tr><th rowspan="2">回合</th><th rowspan="2">怪组</th><th colspan="3">地面</th><th colspan="3">空中</th></tr>' +
+    '<tr><th>普通</th><th>精锐</th><th>特殊</th><th>普通</th><th>精锐</th><th>特殊</th></tr>' +
+    rounds.map(r => { const f = Object.entries(r.enemies.fixed || {});
+      return '<tr><td>' + r.round + '</td><td>' + HALF[halfOf(r)] + (f.length ? '<div class="note">另有 ' + esc(f.map(e => e[0] + "×" + e[1]).join("、")) + '</div>' : "") + '</td>' +
+        SLOT.map(k => '<td>' + (pool(r, k) ? pool(r, k).toLocaleString() : '<span class="zero">·</span>') + '</td>').join("") + '</tr>'; }).join("") + '</table></div>' +
+    '<h2>怪组</h2><div class="bar">' + SP.types.map(t => '<button class="chip' + (t === cur ? " on" : "") + '" data-spt="' + t.id + '">' + esc(t.name) + ' ' + t.groups.length + '</button>').join("") + '</div>' +
+    '<div class="cards wide">' + cur.groups.map(card).join("") + '</div>' +
+    '<p class="src" style="margin-top:14px"><a href="https://www.bilibili.com/video/BV11BW26KEZE" target="_blank" rel="noopener">黑蓑影卫攻略组《卫戍协议是如何控制出怪的？》</a>　' +
+    '<a href="https://www.bilibili.com/video/BV1BrWQ6zEnX" target="_blank" rel="noopener">路标月报《卫戍协议敌人生成机制深度解析》</a></p>';
+}
+function enemies(){
+  return '<p class="src">每局从 9 类里抽几类（联合模拟 3 类、个人模拟 2 类），开局会告诉你是哪几类。下面是每一类包含的敌人和图鉴里写的能力。</p>' +
+    DB.enemyTypes.map(t => '<details><summary>' + esc(t.name) + ' <span class="tag">' + t.members.length + ' 种</span><span class="note" style="font-weight:400">' + esc(t.desc) + '</span></summary><div>' +
+      (t.members.length ? t.members.map(e => '<div class="en"><b>' + esc(e.name) + '</b>' + (e.level ? '<span class="tag' + (e.level === "ELITE" ? " w" : e.level === "BOSS" ? " r" : "") + '">' + (LVL[e.level] || e.level) + '</span> ' : "") +
+        (e.firstHalf ? '<span class="tag g">上半场</span>' : '<span class="tag">下半场</span>') +
+        (e.abilities.length ? '<ul>' + e.abilities.map(a => '<li>' + esc(a) + '</li>').join("") + '</ul>' : '<div class="note">图鉴里没写特殊能力</div>') +
+        ((e.withNormal.length || e.withElite.length) ? '<div class="note">同批的普通 / 精英敌人：' + esc([...e.withNormal, ...e.withElite].join("、")) + '</div>' : "") + '</div>').join("")
+        : '<div class="note">这一类不参与随机，没有单独列出的特训敌人。敌人池：' + esc(t.pool.join("、")) + '</div>') + '</div></details>').join("");
+}
+const DBX = window.SWEEP_DBX || {bossImg: {}, bossGuides: {}, jobs: [], isoSources: [], fuse: []};
+function bosses(){
+  const HP = [["mode_multi_funny","标准"],["mode_multi_normal","险境"],["mode_multi_hard","绝境"],["mode_multi_abyss","终极"]];
+  const vids = n => { const g = DBX.bossGuides[n] || []; return g.length ? '<div class="bvids"><b>相关视频</b>' + g.map(v => '<a target="_blank" rel="noopener" href="https://www.bilibili.com/video/' + esc(v.bvid) + '"><span class="k">' + esc(v.kind) + '</span>' + esc(v.title) + ' <span class="w">— ' + esc(v.author) + '</span></a>').join("") + '</div>' : ""; };
+  return '<p class="src">血量是联合模拟四个难度的数值；个人模拟的规程等级 1 / 10 / 20 分别和标准 / 约 1.4 倍险境 / 终极相当。隐秘核心是同一个领袖的强化形态，要在模拟中达成特定条件才会进。</p><div class="cards">' +
+    DB.bosses.map(b => '<div class="card"><div class="bhd">' + (DBX.bossImg[b.id] ? '<img class="bimg" src="' + esc(DBX.bossImg[b.id]) + '" alt="" loading="lazy">' : "") + '<div><h3>' + esc(b.name) + (b.hidden ? '<span class="tag r">隐秘核心</span>' : "") + '</h3>' +
+      '<div class="note">' + HP.filter(h => b.hp[h[0]]).map(h => h[1] + " " + b.hp[h[0]].toLocaleString()).join(" · ") + '</div></div></div>' +
+      '<ul>' + b.abilities.map(a => a === "隐秘核心" ? '</ul><div class="tag r" style="display:inline-block;margin-top:4px">隐秘核心形态</div><ul>' : '<li>' + esc(a) + '</li>').join("") + '</ul>' +
+      (b.hidden ? "" : vids(b.name)) + '</div>').join("") + '</div>';
+}
+// 转职合成：变形同构体 + 带盟约的装备 = 携带者算作这个盟约；另外是装备两两组合、干员晋升的规则
+function jobs(){
+  const ic = n => window.SWEEP_EQTIPS && window.SWEEP_EQTIPS.icons && window.SWEEP_EQTIPS.icons[n] ? '<img src="' + esc(window.SWEEP_EQTIPS.icons[n]) + '" alt="" loading="lazy">' : "";
+  const by = {}; DBX.jobs.forEach(j => (by[j.bond] = by[j.bond] || []).push(j));
+  // 这件装备从哪来：哪些干员 / 策略会直接给，再加商店
+  const srcLine = x => '<div class="s">' + (x.avatar ? '<img src="' + esc(x.avatar) + '" alt="" loading="lazy">' : x.icon ? '<img class="r" src="' + esc(x.icon) + '" alt="" loading="lazy">' : "") +
+    '<span><b>' + esc(x.name) + '</b>' + (x.kind === "策略" ? "（策略）" : x.tier ? "（" + R[x.tier] + " 阶）" : "") + '　' + esc(x.text) + (x.elite ? "；精锐：" + esc(x.elite.replace(/^[^：]+：/, "")) : "") + '</span></div>';
+  const srcs = j => { const xs = (DBX.eqSources || {})[j.equip] || [];
+    return '<div class="jsrc">' + xs.map(srcLine).join("") + '<div class="s shop">' + (j.hidden ? "商店不卖" : "商店：" + R[j.tier] + " 本起能刷到") + '</div></div>'; };
+  return '<p class="src">「变形同构体」和下面任意一件装备同时带在一个干员身上，这个干员就算作对应盟约的成员（例：变形同构体 + 精准狙击镜 = 转精准）。</p>' +
+    '<div class="jgrid">' + Object.keys(by).map(b => '<div class="jcard"><h3>转' + esc(b) + '</h3>' +
+      by[b].map(j => '<div class="jeq">' + ic("变形同构体") + '<span class="jplus">+</span>' + ic(j.equip) + '<span>' + esc(j.equip) + '</span><span class="p">' + R[j.tier] + ' 阶 · ' + j.price + ' 资金</span></div>' + srcs(j)).join("") + '</div>').join("") + '</div>' +
+    ((DBX.randomSources || []).length ? '<p class="src" style="margin-top:10px">会给随机装备的：' + DBX.randomSources.map(x => esc(x.name) + (x.kind === "策略" ? "（策略）" : "") + "：" + esc(x.text.replace(/^[^：]+：/, ""))).join("；") + '</p>' : "") +
+    '<h2>变形同构体从哪来</h2><div class="cards">' + DBX.isoSources.map(x => '<div class="card"><h3>' + esc(x.name) + '<span class="tag">' + esc(x.kind) + (x.tier ? " · " + R[x.tier] + " 阶" : "") + (x.elite ? " · 精锐" : "") + '</span></h3><p>' + esc(x.text) + '</p></div>').join("") + '</div>' +
+    '<h2>装备组合</h2><p class="src">两件装备带在同一个干员身上，会组合成一件新装备。</p><div class="jgrid">' + DBX.fuse.map(f => '<div class="jcard"><div class="jeq">' + ic(f.a) + '<span>' + esc(f.a) + '</span></div><div class="jeq"><span class="jplus">+</span>' + ic(f.b) + '<span>' + esc(f.b) + '</span></div><div class="jeq"><span class="jplus">=</span>' + ic(f.result) + '<b>' + esc(f.result) + '</b></div></div>').join("") + '</div>' +
+    '<h2>干员晋升</h2><div class="card"><p>招到 3 名同一干员的初始状态，立刻晋升：第 3 名不进手牌，已有的 2 名换成 1 名精锐。</p>' +
+    '<p>晋升后商店临时刷出 3 名比调度中心高一阶（最高 6 阶）的干员，都不要钱，选 1 名后恢复原来的商店。</p>' +
+    '<p>星极只要 2 名就能晋升。博士投影：装备后下个回合开始时销毁，这名干员晋升为精锐。拟态物质：装备时销毁，已有至少 2 名该初始干员时再给 1 名（凑成晋升），否则随机给 1 名同阶干员。</p></div>';
+}
+// 攻略里的装备推荐（sources/equip_tips.json → equip_tips.js）：每条带 UP 名字，链回原视频对应的时间点
+const EQT = window.SWEEP_EQTIPS || {tips: [], tiers: null, mechanics: []};
+const tipsOf = {}; EQT.tips.forEach(t => (tipsOf[t.equip] = tipsOf[t.equip] || []).push(t));
+const secs = t => { const m = /^(\d+):(\d+)$/.exec(t || ""); return m ? +m[1] * 60 + +m[2] : 0; };
+const vlink = (bv, t, text) => '<a target="_blank" rel="noopener" href="https://www.bilibili.com/video/' + esc(bv) + (secs(t) ? "?t=" + secs(t) : "") + '">' + text + '</a>';
+function equip(){
+  const nTip = Object.keys(tipsOf).length;
+  const list = DB.equipment.filter(e => (!st.eqTier || e.tier === st.eqTier) && (!st.eqTip || tipsOf[e.name]) && (!st.eqQ || (e.name + e.effect + (e.relatedBond || "") + (tipsOf[e.name] || []).map(t => t.text).join("")).includes(st.eqQ)));
+  const tr = EQT.tiers;
+  return '<p class="src">共 ' + DB.equipment.length + ' 件。两件相同的装备会合成进阶版（金色字是进阶效果）。其中 ' + nTip + ' 件附了攻略里的推荐用法。</p>' +
+    (tr ? '<div class="eqrank"><span class="note">二阶装备排行 ' + vlink(tr.bvid, "", "（" + esc(tr.author) + "）") + '</span>' + tr.rows.map(r => '<span><b>' + esc(r[0]) + '</b>' + r[1].map(esc).join("、") + '</span>').join("") + '</div>' : "") +
+    '<div class="bar"><input type="search" id="eqQ" placeholder="搜名字 / 效果 / 盟约 / 干员" value="' + esc(st.eqQ) + '">' +
+    (nTip ? '<button class="chip' + (st.eqTip ? " on" : "") + '" data-eqtip="1">有推荐 ' + nTip + '</button>' : "") +
+    [0,1,2,3,4,5,6].map(t => '<button class="chip' + (st.eqTier === t ? " on" : "") + '" data-eqt="' + t + '">' + (t ? R[t] + " 阶" : "全部") + '</button>').join("") + '</div>' +
+    '<div class="cards" id="eqList">' + list.map(e => '<div class="card" style="--tc:var(--t' + e.tier + ')"><h3>' + (EQT.icons && EQT.icons[e.name] ? '<img class="eqico" src="' + esc(EQT.icons[e.name]) + '" alt="" loading="lazy">' : "") + esc(e.name) + '<span class="tag t">' + R[e.tier] + ' 阶</span><span class="tag">' + e.price + ' 资金</span>' +
+      (e.relatedBond ? '<span class="tag g">' + esc(e.relatedBond) + (e.giveBond ? " · 转职" : "") + '</span>' : "") + (e.hidden ? '<span class="tag">商店不卖</span>' : "") + '</h3>' +
+      '<p>' + esc(e.effect) + '</p>' + (e.goldEffect && e.goldEffect !== e.effect ? '<p class="gold">进阶：' + esc(e.goldEffect) + '</p>' : "") +
+      (e.fuse ? '<p class="note">和「' + esc(e.fuse.with) + '」一起装备会合成「' + esc(e.fuse.result) + '」</p>' : "") +
+      (tipsOf[e.name] ? '<div class="tips"><b>攻略推荐</b><ul>' + tipsOf[e.name].map(t => '<li>' + esc(t.text) + ' ' + vlink(t.bvid, t.t, "— " + esc(t.author)) + '</li>').join("") + '</ul></div>' : "") + '</div>').join("") + '</div>' +
+    (EQT.mechanics && EQT.mechanics.length ? '<details class="mech" style="margin-top:14px"><summary>各盟约加成怎么算（乘算还是加算） ' + vlink(EQT.mechanics[0].bvid, "", "— " + esc(EQT.mechanics[0].author)) + '</summary><div style="margin-top:6px">' +
+      EQT.mechanics.map(m => '<div class="mrow"><b>' + esc(m.bond) + '</b><span>' + esc(m.how) + '</span></div>').join("") + '</div></details>' : "");
+}
+function strats(){
+  const list = DB.strategies.filter(s => (!st.stKind || s.kind === st.stKind) && (!st.stQ || ((s.leader || "") + (s.title || "") + s.desc + s.bonds.join("")).includes(st.stQ)));
+  return '<p class="src">共 ' + DB.strategies.length + ' 个策略（开局选的分队）。盟约型策略绑定一个核心盟约。</p>' +
+    '<div class="bar"><input type="search" id="stQ" placeholder="搜发起人 / 效果 / 盟约" value="' + esc(st.stQ) + '">' +
+    [["","全部"],["通用","通用"],["盟约型","盟约型"]].map(k => '<button class="chip' + (st.stKind === k[0] ? " on" : "") + '" data-stk="' + k[0] + '">' + k[1] + '</button>').join("") + '</div>' +
+    '<div class="cards" id="stList">' + list.map(s => '<div class="card"><h3>' + esc(s.leader || s.id) + (s.title ? '<span class="note" style="font-weight:400">' + esc(s.title) + '</span>' : "") +
+      '<span class="tag">初始生命 ' + s.hp + '</span>' + s.bonds.map(b => '<span class="tag g">' + esc(b) + '</span>').join("") + '</h3>' +
+      '<p>' + esc(s.desc.replace(/^【[^】]+】\n?/, "")) + '</p>' + (s.unlock ? '<p class="note">解锁：' + esc(s.unlock) + '</p>' : "") +
+      (s.closedIn.length ? '<p class="note">这些模式不能用：' + esc(s.closedIn.join("、")) + '</p>' : "") + '</div>').join("") + '</div>';
+}
+const VIEW = {modes, spawn, enemies, bosses, equip, jobs, strats};
+function render(keepFocus){
+  $("tabs").innerHTML = TABS.map(t => '<button class="tab' + (st.tab === t[0] ? " on" : "") + '" data-tab="' + t[0] + '">' + t[1] + '</button>').join("");
+  const f = keepFocus && document.activeElement && document.activeElement.id, pos = f && document.activeElement.selectionStart;
+  $("main").innerHTML = VIEW[st.tab]();
+  if(f && $(f)){ $(f).focus(); try{ $(f).setSelectionRange(pos, pos); }catch(e){} }
+}
+document.addEventListener("click", e => {
+  const t = e.target; let el;
+  if((el = t.closest("[data-tab]"))){ st.tab = el.dataset.tab; history.replaceState(null, "", "#" + st.tab); render(); window.scrollTo(0, 0); }
+  else if((el = t.closest("[data-eqt]"))){ st.eqTier = +el.dataset.eqt; render(); }
+  else if(t.closest("[data-eqtip]")){ st.eqTip = !st.eqTip; render(); }
+  else if((el = t.closest("[data-stk]"))){ st.stKind = el.dataset.stk; render(); }
+  else if((el = t.closest("[data-spt]"))){ st.spType = el.dataset.spt; render(); }
+});
+document.addEventListener("change", e => { if(e.target.id === "modeSel"){ st.mode = e.target.value; render(); } });
+document.addEventListener("input", e => {
+  if(e.target.id === "eqQ"){ st.eqQ = e.target.value.trim(); render(true); }
+  if(e.target.id === "stQ"){ st.stQ = e.target.value.trim(); render(true); }
+});
+render();
+})();
+</script>
+</body>
+</html>

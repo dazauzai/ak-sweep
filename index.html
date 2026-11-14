@@ -1,0 +1,1799 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>卫戍协议 阵容配装器</title>
+<meta name="description" content="明日方舟「卫戍协议·规程」阵容配装器：选干员实时看盟约，截图识别本局禁用，按禁用筛攻略阵容，查出怪规律、敌人和装备。不用登录，手机能用。玩家自制，非官方。">
+<meta property="og:type" content="website">
+<meta property="og:title" content="卫戍协议 阵容配装器">
+<meta property="og:description" content="明日方舟「卫戍协议·规程」阵容配装器：选干员实时看盟约，截图识别本局禁用，按禁用筛攻略阵容，查出怪规律、敌人和装备。不用登录，手机能用。玩家自制，非官方。">
+<meta property="og:url" content="https://dazauzai.github.io/ak-sweep/">
+<meta property="og:image" content="https://dazauzai.github.io/ak-sweep/img/og.jpg">
+<meta itemprop="name" content="卫戍协议 阵容配装器">
+<meta itemprop="description" content="明日方舟「卫戍协议·规程」阵容配装器：选干员实时看盟约，截图识别本局禁用，按禁用筛攻略阵容，查出怪规律、敌人和装备。不用登录，手机能用。玩家自制，非官方。">
+<meta itemprop="image" content="https://dazauzai.github.io/ak-sweep/img/og.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23162023'/%3E%3Cpath d='M32 9l19 8v15c0 11-8 19.500-19 23-11-3.500-19-12-19-23V17z' fill='none' stroke='%2335c9a5' stroke-width='5' stroke-linejoin='round'/%3E%3Cpath d='M23 32l7 7 12-14' fill='none' stroke='%2335c9a5' stroke-width='5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#0e1416; --panel:#162023; --panel2:#1d2a2e; --line:#2b3b40;
+  --text:#e6eeee; --dim:#8fa3a6; --accent:#35c9a5; --accent-bg:#12392f;
+  --warn:#ffb020; --bad:#e2625a;
+  --t1:#c5c5c5; --t2:#ffffff; --t3:#17a589; --t4:#00b0ff; --t5:#ffbb00; --t6:#ff7f00;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--text);font:14px/1.5 "Microsoft YaHei","PingFang SC",system-ui,sans-serif;
+  -webkit-tap-highlight-color:transparent}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;padding:0}
+h1,h2,h3{margin:0;font-weight:600}
+
+header.bar{display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid var(--line);background:var(--panel)}
+header.bar h1{font-size:16px}
+.tagline{color:var(--dim);font-size:12px}
+.topnav{display:flex;gap:8px;align-items:center}
+.brand{display:flex;align-items:baseline;gap:12px;min-width:0}
+.slot{border:1px dashed #44575e;border-radius:8px;min-height:104px;background:rgba(255,255,255,.015)}
+header.bar .sub{color:var(--dim);font-size:12px}
+header.bar .sp{flex:1}
+.btn{padding:5px 12px;border:1px solid var(--line);border-radius:6px;background:var(--panel2)}
+.btn:hover{border-color:var(--accent)}
+a.btn{text-decoration:none;display:inline-block;color:inherit}
+.btn.primary{background:var(--accent-bg);border-color:var(--accent);color:var(--accent)}
+.srcbtn{margin-top:8px;font-size:13px}
+
+main{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr) 360px;grid-template-areas:"pool team bonds";
+  height:calc(100% - 49px - var(--promo, 0px))}
+/* 最上面一条：B 站介绍视频（不是弹窗，点 ✕ 后这个浏览器不再显示） */
+body.haspromo{--promo:29px}
+.promo{height:28px;display:flex;align-items:center;justify-content:center;gap:10px;padding:0 36px;position:relative;border-bottom:1px solid var(--line);background:var(--accent-bg);font-size:12px;white-space:nowrap;overflow:hidden}
+.promo a{color:var(--accent);text-decoration:none;overflow:hidden;text-overflow:ellipsis}
+.promo a:hover{text-decoration:underline}
+.promo button{position:absolute;right:8px;top:2px;width:24px;height:24px;color:var(--dim)}
+.promo button:hover{color:var(--text)}
+.side{display:contents}
+section{min-height:0;overflow:auto;padding:14px 16px}
+#pool{grid-area:pool;border-right:1px solid var(--line)}
+#team{grid-area:team;border-right:1px solid var(--line)}
+#bonds{grid-area:bonds;background:var(--panel)}
+.sec-title{display:flex;align-items:baseline;gap:8px;margin-bottom:10px}
+.sec-title h2{font-size:15px}
+.sec-title .hint{color:var(--dim);font-size:12px}
+
+/* 筛选 */
+.filters{position:sticky;top:-14px;z-index:2;background:var(--bg);padding:14px 0 8px;margin-top:-14px}
+.filters input{width:100%;padding:7px 10px;border-radius:6px;border:1px solid var(--line);background:var(--panel);color:var(--text);font:inherit;outline:none}
+.filters input:focus{border-color:var(--accent)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.chip{padding:2px 9px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--dim);font-size:12px;white-space:nowrap}
+.chip.core{color:var(--text)}
+.chip{display:inline-flex;align-items:center;gap:4px}
+.bi{width:18px;height:18px;object-fit:contain;flex:none;vertical-align:middle}
+.frow{display:flex;align-items:flex-start;gap:8px;margin-top:8px}
+.frow .chips{margin-top:0;flex:1;min-width:0}
+.flabel{flex:none;font-size:12px;color:var(--dim);line-height:24px;width:2.2em}
+.bond .bn{display:inline-flex;align-items:center;gap:5px}
+.bond .bi{width:22px;height:22px}
+.op .tags b{display:inline-flex;align-items:center;gap:2px}
+.op .tags .bi{width:11px;height:11px}
+#sheet h2{display:flex;align-items:center;gap:8px}
+#sheet h2 .bi{width:30px;height:30px}
+.chip.on{background:var(--accent-bg);border-color:var(--accent);color:var(--accent)}
+
+/* 干员卡 */
+.tier{margin-top:12px}
+.tier h3{font-size:13px;display:flex;align-items:center;gap:6px;margin-bottom:8px}
+.tier h3 i{width:10px;height:10px;border-radius:2px;display:inline-block;background:var(--tc)}
+.tier h3 span{color:var(--dim);font-weight:400;font-size:12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px}
+.op{position:relative;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 4px 5px;border-radius:8px;
+  background:var(--panel);border:1px solid var(--line);cursor:pointer;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;text-align:center}
+.op:hover{border-color:var(--tc)}
+.op .av{width:60px;height:60px;border-radius:6px;background:#0a0f10;border-bottom:3px solid var(--tc);overflow:hidden;display:grid;place-items:center;
+  font-size:22px;color:var(--dim)}
+.op .av img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
+.op .nm{font-size:12px;line-height:1.25;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.op .tags{display:flex;flex-wrap:wrap;justify-content:center;gap:2px}
+.op .tags b{font-weight:400;font-size:10px;line-height:1.3;padding:0 4px;border-radius:3px;background:var(--panel2);color:var(--dim)}
+.op .tags b.lit{background:var(--accent-bg);color:var(--accent)}
+.op.picked{opacity:.38}
+.op.picked::after{content:"✓";position:absolute;top:3px;left:6px;color:var(--accent);font-weight:700}
+.op .info{position:absolute;top:2px;right:2px;width:20px;height:20px;border-radius:50%;background:var(--panel2);border:1px solid var(--line);
+  color:var(--dim);font-size:11px;line-height:18px;opacity:0}
+.op:hover .info,.op .info:focus{opacity:1}
+.op .info:hover{color:var(--accent);border-color:var(--accent)}
+
+/* 阵容区 */
+#teamGrid{min-height:220px;border:2px dashed var(--line);border-radius:10px;padding:10px;align-content:start}
+#teamGrid.over{border-color:var(--accent);background:var(--accent-bg)}
+#teamGrid .empty{grid-column:1/-1;color:var(--dim);text-align:center;padding:60px 10px}
+#pool.over{box-shadow:inset 0 0 0 2px var(--bad)}
+
+/* 盟约 */
+.bond{display:block;width:100%;text-align:left;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--panel2);margin-bottom:6px}
+.bond:hover{border-color:var(--accent)}
+.bond .row{display:flex;align-items:center;gap:8px}
+.bond .bn{font-weight:600}
+.bond .kind{font-size:10px;color:var(--dim);border:1px solid var(--line);border-radius:3px;padding:0 4px}
+.bond .cnt{margin-left:auto;font-variant-numeric:tabular-nums;color:var(--dim)}
+.bond .steps{display:flex;gap:4px;margin-top:5px;align-items:center;flex-wrap:wrap}
+.bond .step{min-width:22px;text-align:center;font-size:11px;border-radius:4px;padding:0 5px;border:1px solid var(--line);color:var(--dim)}
+.bond .step.hit{background:var(--accent);border-color:var(--accent);color:#04241c;font-weight:700}
+.bond .st{font-size:12px;color:var(--dim);margin-left:4px}
+.bond.active{border-color:var(--accent);background:var(--accent-bg)}
+.bond.active .cnt,.bond.active .bn{color:var(--accent)}
+.bond.active .st{color:var(--text)}
+.bond.broken{border-color:var(--bad)}
+.bond.broken .st{color:var(--bad)}
+.bond.zero{opacity:.5}
+.bond .plus{font-size:10px;color:var(--warn);border:1px solid var(--warn);border-radius:3px;padding:0 4px}
+.op .av{position:relative}
+.bdgs{position:absolute;left:2px;bottom:2px;display:flex;gap:2px;align-items:flex-end}
+.bdg{display:inline-flex;flex:none;width:16px;height:16px;border-radius:4px;background:rgba(8,14,15,.82);align-items:center;justify-content:center;vertical-align:-3px}
+.bdg.stk{flex-direction:column-reverse;gap:2px;padding:2px 3px}
+.bdg.stk i{display:block;width:100%;height:2px;border-radius:1px;background:#3d5257}
+.bdg.stk.s1 i:nth-child(-n+1),.bdg.stk.s2 i:nth-child(-n+2),.bdg.stk.s3 i{background:var(--accent)}
+.bdg.stk.s3{box-shadow:0 0 0 1px var(--accent)}
+.bdg.coin{border-radius:50%;font-size:10px;font-weight:700;line-height:1;color:var(--t5);box-shadow:inset 0 0 0 1px #6b5a1e}
+.bdg.coin.c2{box-shadow:inset 0 0 0 1.5px var(--t5)}
+.bdg.coin.c3{background:var(--t5);color:#2a1e00;box-shadow:none}
+.kmark{position:absolute;left:-3px;top:-3px;z-index:1;width:18px;height:18px;border-radius:5px;background:var(--t5);color:#2a1e00;
+  font:800 12px/18px Arial,sans-serif;text-align:center;box-shadow:0 0 0 2px var(--panel),0 0 8px rgba(255,187,0,.55)}
+.kmark.inl{position:static;display:inline-block;box-shadow:none;vertical-align:-3px;margin-right:4px}
+.op .av{overflow:visible}
+.op .av img{border-radius:6px 6px 0 0}
+.skm{position:absolute;right:2px;bottom:2px;min-width:15px;height:15px;padding:0 3px;border-radius:4px;background:rgba(8,14,15,.85);
+  color:#fff;font:700 10px/15px Arial,sans-serif;text-align:center;box-shadow:inset 0 0 0 1px #5b7379}
+.skm.split{color:var(--warn);box-shadow:inset 0 0 0 1px var(--warn)}
+.skm.inl{position:static;display:inline-block;margin-right:3px;vertical-align:-2px}
+.whm{position:absolute;right:2px;top:2px;min-width:15px;height:15px;padding:0 2px;border-radius:4px;background:rgba(8,14,15,.85);
+  color:#9fd8ff;font:700 10px/15px "Microsoft YaHei","PingFang SC",sans-serif;text-align:center;box-shadow:inset 0 0 0 1px #5b7379}
+.whm.w1{color:var(--accent)}
+.whm.w2{color:var(--warn)}
+.whm.inl{position:static;display:inline-block;margin-right:3px;vertical-align:-2px}
+.op.inb .whm{top:17px}
+.fx a.lnk{font-size:12px}
+.legend{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:8px;padding-top:8px;border-top:1px dashed var(--line);font-size:11px;color:var(--dim)}
+.legend>span{display:inline-flex;align-items:center;gap:3px;max-width:100%}
+.legend .bdg{vertical-align:0}
+.legend[hidden]{display:none}
+.morebar{display:flex;gap:16px;margin-top:8px;font-size:12px}
+.morebar button{color:var(--dim)}
+.morebar button.on{color:var(--text)}
+.sec-title .sp{flex:1}
+.empty .start{margin-top:12px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.empty .btn{font-size:13px;color:var(--text)}
+.empty .btn.primary{color:var(--accent)}
+.monly{display:none}
+.tagp.warnp{color:var(--warn);border-color:var(--warn)}
+.tagp.badp{color:var(--bad);border-color:var(--bad)}
+.tagp.off{text-decoration:line-through;opacity:.55}
+.bcard .note{font-size:12px;color:var(--dim);margin-top:4px}
+.bcard .note.bad{color:var(--bad)}
+.bcard .note.warn{color:var(--warn)}
+.bcard.lv2{opacity:.7}
+.bcard .bhead{display:flex;align-items:center;gap:10px}
+.bcard .bhead .bt{flex:1;min-width:0}
+.bcard .cvs{display:flex;align-items:center;gap:4px;flex:none}
+.bcard .cav{width:38px;height:38px;border-radius:8px;object-fit:cover;border:1px solid var(--line);background:var(--panel2)}
+.bcard .cbi{width:26px;height:26px;object-fit:contain;margin-left:2px}
+.bcard .cav.gone,.bcard .cbi.gone{filter:grayscale(1);opacity:.4}
+.bcard .csi{width:30px;height:30px;border-radius:50%;object-fit:cover}
+.eqs{display:flex;flex-direction:column;gap:6px}
+.eqr{display:flex;gap:8px;align-items:flex-start;font-size:13px;line-height:1.5}
+.eqr .eqi{display:flex;gap:2px;flex:none;flex-wrap:wrap;max-width:110px}
+.eqr .eqi img{width:24px;height:24px;object-fit:contain;border-radius:4px;background:var(--panel2)}
+.eqr .eqb{min-width:0}
+.eqr .eqn{font-weight:600}
+.eqr .eqt{color:var(--dim)}
+.eqr a{color:var(--dim);font-size:12px;white-space:nowrap}
+.tagp .si{width:16px;height:16px;border-radius:50%;object-fit:cover;flex:none;vertical-align:middle}
+.banbox{border:1px solid var(--bad);border-radius:10px;padding:8px 10px;margin:8px 0 10px;background:var(--panel2);font-size:13px;line-height:1.6}
+.banbox.warn{border-color:var(--warn)}
+.banbox.ok{border-color:var(--accent)}
+.banbox.tip{border-color:var(--line);color:var(--dim)}
+.banbox .note{color:var(--dim);font-size:12px}
+.stkbox{white-space:normal;padding:4px 12px}
+.stk-row{padding:8px 0 4px;border-top:1px dashed var(--line)}
+.stk-row:first-child{border-top:0}
+.stk-b{font-size:12px;display:flex;gap:6px;align-items:center;color:var(--dim);margin-bottom:6px}
+.stk-b b{color:var(--text);font-size:13px}
+.stk-o{min-width:0}
+.sop{display:inline-flex;align-items:center;gap:5px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:2px 9px 2px 2px;margin:0 5px 5px 0;font-size:12px;line-height:1.35;cursor:pointer;max-width:100%}
+.sop:hover{border-color:var(--accent)}
+.sop img{width:22px;height:22px;border-radius:50%;object-fit:cover;flex:none;background:#0a0f10}
+.sop b{font-weight:600;white-space:nowrap}
+.sop .y{color:var(--warn);font-size:11px}
+.sop.core{border-color:var(--t5)}
+.sop.core b::before{content:"K";display:inline-block;width:14px;height:14px;line-height:14px;text-align:center;border-radius:4px;background:var(--t5);color:#2a1e00;font-size:10px;margin-right:4px}
+.sop.out b{text-decoration:line-through;color:var(--bad)}
+.sop.out img{filter:grayscale(1) brightness(.6)}
+.sop .tagp{margin:0}
+.tabs{display:flex;gap:6px;margin:2px 0 10px}
+.tabs button{flex:1;padding:7px 0;border:1px solid var(--line);border-radius:8px;background:var(--panel2);color:var(--dim)}
+.tabs button.on{border-color:var(--accent);color:var(--accent);background:var(--accent-bg)}
+.mcard{border:1px solid var(--line);border-radius:10px;background:var(--panel2);padding:10px 12px;margin-bottom:8px}
+.mcard .bt{font-weight:600;font-size:15px;margin-bottom:6px}
+.mcard .mnote{white-space:pre-wrap;word-break:break-word;font-size:13px;color:var(--dim);margin-top:6px}
+.mcard .acts{margin-top:8px;gap:6px}
+.mcard .acts .btn{padding:5px 10px;font-size:12px;flex:none}
+.mavs{display:flex;flex-wrap:wrap;gap:4px}
+.mavs img{width:36px;height:36px;border-radius:6px;object-fit:cover;background:#0a0f10}
+.mform input,.mform textarea{display:block;width:100%;padding:8px 10px;border-radius:6px;border:1px solid var(--line);background:var(--panel2);color:var(--text);font:inherit;font-size:16px;outline:none;margin-bottom:8px}
+.mform textarea{min-height:130px;resize:vertical;margin-top:8px}
+.mform input:focus,.mform textarea:focus{border-color:var(--accent)}
+.btn[disabled]{opacity:.45;cursor:default}
+#sheet .x.back{margin-left:0;margin-right:-2px;font-size:22px;line-height:1;padding-bottom:3px}
+#sheet.tall{max-height:92vh}
+.bvtabs{position:sticky;top:-17px;z-index:3;background:var(--panel);margin:-8px 0 8px;padding:24px 0 6px}
+.bvtabs button{font-size:14px}
+.stgchips{margin:0 0 8px}
+.stgnav{display:flex;justify-content:space-between;margin:4px 2px 0}
+.chk{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--dim);margin:4px 0 2px;cursor:pointer}
+.chk input{width:18px;height:18px;margin:0;accent-color:var(--accent);flex:none}
+#toast{position:fixed;left:50%;bottom:calc(28px + env(safe-area-inset-bottom));transform:translateX(-50%);background:rgba(0,0,0,.82);color:#fff;padding:8px 14px;border-radius:999px;font-size:13px;z-index:30;opacity:0;pointer-events:none;transition:opacity .2s;max-width:86vw;text-align:center}
+#toast.show{opacity:1}
+.about{margin-top:22px;padding-top:12px;border-top:1px dashed var(--line);font-size:12px;color:var(--dim);line-height:1.7}
+.about b{color:var(--text);font-weight:600}
+.about p{margin:0 0 6px}
+.bdg.feat.amp{color:#ff8a5c}
+.bdg.feat.equip{color:#b79cff}
+.bdg.feat.unit{color:#5cc8ff}
+.bdg.feat.refresh{color:#7fe0d0}
+.bdgs{flex-wrap:wrap-reverse;max-width:100%}
+.chip.off{opacity:.35;text-decoration:line-through}
+.chip.ban{opacity:.55;text-decoration:line-through;border-color:var(--bad);color:var(--bad)}
+.chip.ban .bi{filter:grayscale(1)}
+.banchips{flex-wrap:wrap !important;overflow:visible !important}
+.banchips .chip{padding:5px 11px;font-size:13px}
+.bond.banned .bn{text-decoration:line-through}
+.bond.banned .st{color:var(--bad)}
+.op.out .av img{filter:grayscale(1) brightness(.6)}
+.op.out .av::after{content:"禁";position:absolute;right:2px;top:2px;width:16px;height:16px;border-radius:4px;background:var(--bad);color:#fff;font-size:11px;line-height:16px;text-align:center}
+.op.out .nm{color:var(--bad)}
+.outbar{margin-top:10px;padding:6px 10px;border-radius:8px;border:1px solid var(--bad);color:var(--text);font-size:12px;display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center}
+.lnk{color:var(--accent);text-decoration:underline;font-size:12px}
+.op.inb{border-color:var(--warn);box-shadow:0 0 0 1px var(--warn)}
+.op .stg{position:absolute;top:2px;right:2px;font-size:9px;line-height:1.5;padding:0 4px;border-radius:3px;background:var(--warn);color:#2a1e00;font-weight:700;z-index:1}
+.op:hover .stg{display:none}
+.chip.hl{border-color:var(--warn);color:var(--warn)}
+.outbar.build{border-color:var(--warn)}
+.bcard{display:block;width:100%;text-align:left;border:1px solid var(--line);border-radius:10px;background:var(--panel2);padding:10px 12px;margin-bottom:8px}
+.bcard:hover,.bcard.on{border-color:var(--warn)}
+.bcard .bt{font-weight:600;font-size:15px;display:flex;gap:8px;align-items:center;margin-bottom:4px}
+.tags2{display:flex;flex-wrap:wrap;gap:4px}
+.tags2 .tagp{display:inline-flex;align-items:center;gap:3px;margin-right:0}
+.tags2 .bi{width:13px;height:13px}
+.bst{border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin-bottom:8px;background:var(--panel2)}
+.bst h4{margin:0 0 6px;color:var(--text);font-size:13px}
+.bl{margin:6px 0 2px;padding-left:18px}
+.bl li{margin:2px 0}
+.op.ext .av{border-bottom-style:dashed}
+#teamGrid .op.ext::before{content:"外援";position:absolute;top:2px;right:3px;font-size:9px;line-height:1.4;padding:0 4px;border-radius:3px;background:var(--panel2);color:var(--warn);border:1px solid var(--warn);z-index:1}
+.xrow{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px}
+.xslot{position:relative;border:1px solid var(--line);border-radius:8px;background:var(--panel2);padding:6px 4px 4px;text-align:center;min-height:118px}
+.xslot .xmain{cursor:pointer}
+.xslot .av{width:56px;height:56px;margin:0 auto;border-radius:6px;overflow:hidden;border-bottom:3px dashed var(--tc);background:#0a0f10;display:grid;place-items:center;color:var(--dim);font-size:20px}
+.xslot .av img{width:100%;height:100%;object-fit:cover;display:block}
+.xslot .nm{font-size:12px;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.xslot .tags{display:flex;flex-wrap:wrap;justify-content:center;gap:2px;margin-top:2px}
+.xslot .tags b{font-weight:400;font-size:10px;padding:0 4px;border-radius:3px;background:var(--panel);color:var(--dim);display:inline-flex;align-items:center;gap:2px}
+.xslot .tags .bi{width:11px;height:11px}
+.xslot .xst{font-size:11px;color:var(--dim);margin-top:3px}
+.xrecs{display:flex;flex-direction:column;gap:8px}
+.xrec{display:flex;gap:8px;align-items:flex-start;font-size:13px;line-height:1.5}
+.xrec .av{width:40px;height:40px;flex:none;border-radius:6px;overflow:hidden;background:#0a0f10;cursor:pointer}
+.xrec .av img{width:100%;height:100%;object-fit:cover;display:block}
+.xrec .xb{min-width:0;flex:1}
+.xrec .xn{font-weight:600}
+.xrec .xn .bi{width:12px;height:12px;vertical-align:-1px}
+.xrec .xt{color:var(--dim)}
+.xrec .xw{font-size:12px;color:var(--dim)}
+.xrec .xw a{color:var(--dim)}
+.xg{font-weight:400;font-size:11px;padding:0 5px;border-radius:3px;background:var(--panel2);color:var(--dim);margin-left:4px;white-space:nowrap}
+.xrec .btn{flex:none;padding:4px 8px;font-size:12px}
+.xrec .xin{flex:none;font-size:12px;color:var(--dim);padding:4px 2px}
+.xtips{margin:0;padding-left:18px;font-size:13px;line-height:1.6;color:var(--dim)}
+.op.ext .rk{position:absolute;left:3px;top:3px;z-index:1;font-size:10px;line-height:1;padding:2px 3px;border-radius:3px;background:var(--t5);color:#2a1e00;font-weight:700}
+.xslot.on{border-color:var(--accent);background:var(--accent-bg)}
+.xslot.on .xst{color:var(--accent);font-weight:600}
+.xslot.ban{opacity:.55}
+.xslot.ban .xst{color:var(--bad)}
+.xslot .xdel{position:absolute;top:2px;right:2px;width:20px;height:20px;border-radius:50%;color:var(--dim);font-size:11px;border:1px solid var(--line);background:var(--panel);z-index:1}
+.xslot .xdel:hover{color:var(--bad);border-color:var(--bad)}
+.xslot.add{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border-style:dashed;color:var(--dim);cursor:pointer;font-size:12px}
+.xslot.add span{font-size:26px;line-height:1}
+.xslot.add:hover{border-color:var(--accent);color:var(--accent)}
+.xq{width:100%;padding:8px 10px;border-radius:6px;border:1px solid var(--line);background:var(--panel2);color:var(--text);font:inherit;outline:none}
+.xq:focus{border-color:var(--accent)}
+#extList .op .tags b{font-size:10px}
+.tagp{display:inline-block;font-size:11px;padding:0 6px;border-radius:4px;background:var(--panel);border:1px solid var(--line);color:var(--dim);margin-right:4px;white-space:nowrap}
+.tagp.ok{color:var(--accent);border-color:var(--accent)}
+.metab{white-space:normal;display:grid;gap:6px}
+.metab .note{font-size:12px}
+.metab .why{margin:3px 0 0 22px;line-height:1.5}
+.srcs{display:grid;gap:4px}
+.srow{display:flex;gap:8px;align-items:center;background:var(--panel2);border-radius:8px;padding:5px 8px;cursor:pointer}
+.srow:hover{outline:1px solid var(--accent)}
+.srow .av{width:36px;height:36px;border-radius:5px;overflow:hidden;flex:none;background:#0a0f10;border-bottom:2px solid var(--tc)}
+.srow .av img{width:100%;height:100%;object-fit:cover;display:block}
+.srow .sb{min-width:0;flex:1}
+.srow b{margin-right:4px}
+.srow .sy{font-size:12px;color:var(--warn)}
+.gen{margin-top:8px}
+.gen summary{cursor:pointer;color:var(--dim);font-size:12px;padding:4px 0}
+.bgroup{font-size:12px;color:var(--dim);margin:12px 0 6px}
+.bgroup:first-child{margin-top:0}
+#bondChips{display:none}
+
+/* 详情弹层 */
+#mask{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;z-index:10;align-items:center;justify-content:center;padding:20px}
+#mask.show{display:flex}
+#sheet{background:var(--panel);border:1px solid var(--line);border-radius:12px;width:min(560px,100%);max-height:86vh;overflow:auto;padding:16px 18px 18px}
+#sheet .head{display:flex;gap:12px;align-items:center;margin-bottom:10px}
+#sheet .head .av{width:72px;height:72px;border-radius:8px;border-bottom:3px solid var(--tc);overflow:hidden;background:#0a0f10;flex:none}
+#sheet .head .av img{width:100%;height:100%;object-fit:cover}
+#sheet .head h2{font-size:18px}
+#sheet .head .meta{color:var(--dim);font-size:12px}
+#sheet .x{margin-left:auto;align-self:flex-start;width:32px;height:32px;border-radius:50%;border:1px solid var(--line);color:var(--dim);flex:none}
+#sheet h4{margin:14px 0 4px;font-size:12px;color:var(--dim);font-weight:400}
+.fx{white-space:pre-wrap;word-break:break-word;background:var(--panel2);border-radius:8px;padding:10px 12px}
+.fx .cond{color:var(--warn)}
+.fx .note{color:var(--dim);font-size:12px}
+.fx hr{border:0;border-top:1px dashed var(--line);margin:8px 0}
+.mini{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:6px}
+.mini .op{padding:4px 2px;border:0;background:none}
+.mini .op .av{width:48px;height:48px}
+.mini .op .info,.mini .op .tags{display:none}
+.acts{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.acts .btn{padding:8px 14px}
+
+/* 窗口不够宽时筛选区会折成很多行，不再吸顶，免得把干员池挤没 */
+@media (max-width: 1400px){ .filters{position:static;margin-top:0;padding-top:0} }
+
+/* ---------- 手机 ---------- */
+@media (max-width: 820px){
+  header.bar{padding:8px 12px;gap:6px 8px;flex-wrap:wrap}
+  header.bar .sub{display:none}
+  header.bar .sp{display:none}
+  #teamCount{display:none !important}
+  .brand{order:1;flex:1;flex-direction:column;align-items:flex-start;gap:0}
+  header.bar h1{font-size:15px;white-space:nowrap;line-height:1.35}
+  header.bar .tagline{font-size:11px;white-space:nowrap}
+  #buildBtn{order:2;padding:6px 14px;font-size:13px;white-space:nowrap}
+  .topnav{order:3;flex:1 1 100%;gap:6px}
+  .topnav .btn{flex:1;min-width:0;text-align:center;white-space:nowrap;padding:6px 2px;font-size:12px}
+  .op .stg{font-size:8px}
+  .monly{display:inline-block}
+  #teamGrid .slot{flex:none;width:50px;height:50px;min-height:0}
+  .xq{font-size:16px}
+  #extList{grid-template-columns:repeat(4,minmax(0,1fr))}
+  main{display:block;height:auto}
+  section{overflow:visible;padding:10px 12px}
+  .side{display:block;position:sticky;top:0;z-index:5;background:var(--panel);border-bottom:1px solid var(--line);box-shadow:0 6px 12px rgba(0,0,0,.35)}
+  #team{border:0;padding-bottom:4px}
+  #team .sec-title{margin-bottom:6px}
+  #teamGrid{display:flex;gap:6px;overflow-x:auto;min-height:0;border:0;padding:0 0 4px;scrollbar-width:none}
+  #teamGrid::-webkit-scrollbar{display:none}
+  #teamGrid .op{flex:none;width:54px;padding:0;border:0;background:none}
+  #teamGrid .op .av{width:50px;height:50px}
+  #teamGrid .op .nm{font-size:10px}
+  #teamGrid .op .tags,#teamGrid .op .info{display:none}
+  .bdg{width:14px;height:14px}
+  #teamGrid .empty{padding:4px 0 2px;width:100%;font-size:13px}
+  #bonds{background:none;padding-top:0;padding-bottom:8px}
+  #bonds .sec-title,#bondList{display:none}
+  #bondChips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+  #bondChips::-webkit-scrollbar{display:none}
+  .bchip{flex:none;padding:3px 9px;border-radius:999px;border:1px solid var(--line);background:var(--panel2);font-size:12px;color:var(--dim);white-space:nowrap}
+  .bchip{display:inline-flex;align-items:center;gap:4px}
+  .flabel{line-height:28px}
+  .bchip b{font-variant-numeric:tabular-nums;margin-left:4px}
+  .bchip.active{border-color:var(--accent);background:var(--accent-bg);color:var(--accent)}
+  .bchip.broken{border-color:var(--bad);color:var(--bad)}
+  .bchip.all{color:var(--text)}
+  #pool{border:0}
+  #pool .sec-title{display:none}
+  .filters{position:static;margin:0;padding:0 0 4px}
+  .filters input{font-size:16px}
+  .chips{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+  .chips::-webkit-scrollbar{display:none}
+  .chip{padding:4px 11px;font-size:13px}
+  .grid{grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+  .op{padding:4px 2px}
+  .op .av{width:100%;height:auto;aspect-ratio:1}
+  .op .nm{font-size:11px}
+  .op .tags b{font-size:9px;padding:0 2px}
+  .op .info{display:none}
+  #mask{align-items:flex-end;padding:0}
+  #sheet{width:100%;border-radius:16px 16px 0 0;border-width:1px 0 0;max-height:82vh;padding-bottom:calc(18px + env(safe-area-inset-bottom))}
+  .acts .btn{flex:1;text-align:center;padding:11px 14px}
+}
+@media (max-width: 380px){ .grid{grid-template-columns:repeat(4,minmax(0,1fr))} }
+</style>
+</head>
+<body>
+<div class="promo" id="promo"><a href="https://www.bilibili.com/video/BV1wWWo64EJd" target="_blank" rel="noopener">觉得好用的话，去 B 站给这个工具的介绍视频点个赞吧 ›</a><button id="promoX" aria-label="不再显示">✕</button></div>
+<script>try{ if(localStorage.getItem("sweep.promo") === "BV1wWWo64EJd") document.getElementById("promo").remove(); else document.body.classList.add("haspromo"); }catch(e){ document.body.classList.add("haspromo"); }
+document.getElementById("promoX") && document.getElementById("promoX").addEventListener("click", function(){ try{ localStorage.setItem("sweep.promo", "BV1wWWo64EJd"); }catch(e){} document.getElementById("promo").remove(); document.body.classList.remove("haspromo"); window.SWEEP_STAT && window.SWEEP_STAT("promo_x"); });</script>
+<header class="bar">
+  <div class="brand"><h1>卫戍协议 · 阵容配装器</h1><span class="tagline">明日方舟 · 非官方工具</span></div>
+  <span class="sub" id="hintTop"></span>
+  <span class="sp"></span>
+  <span id="teamCount" class="sub" style="display:inline"></span>
+  <nav class="topnav">
+    <button class="btn" id="banBtn">本局禁用</button>
+    <button class="btn" id="extBtn">自选编队</button>
+    <a class="btn" id="dbLink" href="db.html">资料库</a>
+    <a class="btn" id="bossLink" data-todb="bosses" href="db.html#bosses">领袖</a>
+    <a class="btn" id="jobLink" data-todb="jobs" href="db.html#jobs">转职合成</a>
+    <button class="btn" id="fbBtn" data-fbopen="1">反馈</button>
+  </nav>
+  <button class="btn primary" id="buildBtn">阵容推荐</button>
+</header>
+<main>
+  <div class="side">
+    <section id="team">
+      <div class="sec-title"><h2>阵容</h2><span class="hint" id="teamN"></span><span class="hint" id="teamHint"></span><span class="sp"></span><button class="lnk" id="saveBtn" data-minenew="1" hidden>保存</button><button class="lnk" id="clearBtn" hidden>清空</button></div>
+      <div class="grid" id="teamGrid"></div>
+    </section>
+    <section id="bonds">
+      <div class="sec-title"><h2>盟约</h2><span class="hint">点开看效果全文</span></div>
+      <div id="bondChips"></div>
+      <div id="bondList"></div>
+    </section>
+  </div>
+  <section id="pool">
+    <div class="sec-title"><h2>干员池</h2><span class="hint">点击或拖进阵容，右键 / ⓘ 看特质</span></div>
+    <div class="filters">
+      <input id="q" type="search" placeholder="搜索干员名" autocomplete="off">
+      <div id="filterChips"></div>
+      <div class="legend" id="legend"></div>
+    </div>
+    <div id="poolList"></div>
+    <div id="about" class="about"></div>
+  </section>
+</main>
+<div id="mask"><div id="sheet" role="dialog" aria-modal="true"></div></div>
+<div id="toast"></div>
+<input type="file" id="shotFile" accept="image/*" hidden>
+
+<script src="data.js?v=bd2e408d"></script>
+<script src="index.js?v=68c09d80"></script>
+<script src="externals.js?v=950b59dc"></script>
+<script src="builds.js?v=5d287a8c"></script>
+<script src="equip_tips.js?v=04445160"></script>
+<script src="stats.js?v=936dac51"></script>
+<script>
+(function(){
+"use strict";
+const DATA = window.SWEEP_DATA;
+if(!DATA){ document.body.innerHTML = '<p style="padding:24px">没找到 data.js，先运行 <code>python parse_wiki.py</code> 生成。</p>'; return; }
+
+const ROMAN = ["","Ⅰ","Ⅱ","Ⅲ","Ⅳ","Ⅴ","Ⅵ"];
+const OPS = new Map(DATA.operators.map(o => [o.name, o]));
+const BONDS = new Map(DATA.bonds.map(b => [b.name, b]));
+const KEY = "sweep.lineup.v1";
+const $ = id => document.getElementById(id);
+const stat = (ev, arg) => { try{ window.SWEEP_STAT && window.SWEEP_STAT(ev, arg); }catch(e){} };   // 匿名使用统计，见 stats.js
+const isMobile = () => matchMedia("(max-width: 820px)").matches;
+
+let lineup = [];            // 干员名，按加入顺序
+const filter = {core: null, extra: null, fn: null, when: []};   // 阵营、职业、功能各选一个，触发时机可多选（占其中一个就算）；几栏之间取交集
+const IDX = window.SWEEP_INDEX || {ops: {}, bondSources: {}, generic: []};
+const meta = n => IDX.ops[n] || {tags: []};
+const FN = [   // 功能筛选：名字 + 判定
+  ["key 牌", m => (m.keyWhy || []).length > 0],
+  ["通用叠层卡", m => m.tags.includes("通用叠层")],
+  ["通用经济卡", m => m.tags.includes("通用经济")],
+  ["给钱", m => m.tags.includes("给钱")],
+  ["核心叠层", m => m.stackTier === "核心"],
+  ["叠层放大", m => m.tags.includes("叠层放大")],
+  ["全部叠层", m => m.tags.includes("给层数")],
+  ["休整期叠层", m => m.roundStack],
+  ["给刷新", m => m.tags.includes("给刷新")],
+  ["给装备", m => m.tags.includes("给装备")],
+  ["给干员", m => m.tags.includes("给干员")],
+];
+// 触发时机：特质里尖括号写的词；「战斗中」的再按条件细分。普通和精锐两段特质合起来看
+const WHEN = ["获得时", "进入休整期时", "休整期结束时", "战斗开始时", "开启技能时", "部署时", "击倒敌人时", "被击倒时", "战斗结束时", "售出时"];
+const whenCache = new Map();
+function whenOf(o){
+  if(whenCache.has(o.name)) return whenCache.get(o.name);
+  const t = (o.trait1 || "") + "\n" + (o.trait2 || ""), s = new Set();
+  (t.match(/<[^<>]+>/g) || []).forEach(x => s.add(x.slice(1, -1)));
+  if(s.delete("休整期开始时")) s.add("进入休整期时");
+  if(/[“"]休整期结束时[”"]特质/.test(t)) s.add("休整期结束时");   // 塞雷娅：照抄身前干员的休整期结束时特质
+  if(s.has("战斗中")){
+    if(/开启技能时/.test(t)) s.add("开启技能时");
+    if(/部署时(?!间)|干员部署使/.test(t)) s.add("部署时");   // 「再部署时间」「部署后」不算
+    if(/被击倒时|自身被击倒/.test(t)) s.add("被击倒时");
+    else if(/击倒/.test(t)) s.add("击倒敌人时");
+  }
+  const r = [...s]; whenCache.set(o.name, r); return r;
+}
+// 触发时机角标：只标这三种；一个干员占了多种时按这里的顺序取第一个
+const WHEN_MARK = [["获得时", "获", "w0"], ["休整期结束时", "休", "w1"], ["开启技能时", "技", "w2"]];
+function whenMark(name){
+  const o = OPS.get(name); if(!o) return "";
+  const w = whenOf(o), m = WHEN_MARK.find(x => w.includes(x[0]));
+  return m ? '<span class="whm ' + m[2] + '" title="' + m[0] + '">' + m[1] + '</span>' : "";
+}
+const LV = {"核心": 3, "中等": 2, "过渡": 1};
+// 角标：叠层 = 三道杠亮几道；给钱 = 金币，实心 / 半实 / 描边
+// 推荐技能角标：两个来源一致显示一个数字，不一致显示「2/3」
+function skillMark(name){
+  const r = meta(name).skills; if(!r || !r.length) return "";
+  const set = [...new Set(r.map(x => x.skill))].sort();
+  return '<span class="skm' + (set.length > 1 ? " split" : "") + '" title="推荐技能">' + set.join("/") + '</span>';
+}
+// K = 某个盟约里最强的叠层来源。筛了阵营/职业时，只给「是所筛盟约核心件」的干员显示
+function keyMark(name){
+  const m = meta(name), why = m.keyWhy || [], k = m.keyFor || []; if(!why.length) return "";
+  const want = [filter.core, filter.extra].filter(Boolean);
+  if(want.length && k.length && !want.some(b => k.includes(b))) return "";
+  return '<span class="kmark" title="key 牌' + (k.length ? "：" + esc(k.join("、")) : "") + '">K</span>';
+}
+function badges(name){
+  const m = meta(name); let h = "";
+  if(m.stackTier){ const n = LV[m.stackTier];
+    h += '<span class="bdg stk s' + n + '" title="叠层 · ' + m.stackTier + '"><i></i><i></i><i></i></span>'; }
+  if(m.moneyTier) h += '<span class="bdg coin c' + LV[m.moneyTier] + '" title="给钱 · ' + m.moneyTier + '">¥</span>';
+  for(const [tag, cls] of FEAT) if(m.tags.includes(tag)) h += featBadge(tag, cls);
+  return keyMark(name) + skillMark(name) + whenMark(name) + (h ? '<div class="bdgs">' + h + '</div>' : "");
+}
+// 特性角标：标签名 -> 样式类。图标是 12x12 的内联 SVG
+const FEAT = [["叠层放大", "amp"], ["给装备", "equip"], ["给干员", "unit"], ["给刷新", "refresh"]];
+const FEAT_SVG = {
+  amp: '<path d="M2.2 6.8 6 3l3.8 3.8M2.2 10.6 6 6.8l3.8 3.8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>',
+  equip: '<path d="M1.5 2.2h9v2.6H7.4v5.7H4.6V4.8H1.5z" fill="currentColor"/>',
+  unit: '<circle cx="6" cy="3.6" r="2.3" fill="currentColor"/><path d="M1.6 11c0-2.9 1.9-4.1 4.4-4.1s4.4 1.2 4.4 4.1z" fill="currentColor"/>',
+  refresh: '<path d="M9.8 6.4A3.9 3.9 0 1 1 8.6 3.3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M10.6 1.2v3.6H7z" fill="currentColor"/>',
+};
+function featBadge(tag, cls){
+  return '<span class="bdg feat ' + cls + '" title="' + tag + '"><svg viewBox="0 0 12 12" width="11" height="11">' + FEAT_SVG[cls] + '</svg></span>';
+}
+let query = "";
+const TEAM_SLOTS = 8;   // 阵容区画几个空位。只是示意这里放阵容，不是人数上限
+// 「按功能筛选」「角标说明」两块的开合，点过以后记住。
+// 没动过的话：功能筛选电脑上展开、手机上收起；角标说明都收起（首屏先让干员露出来）
+const UI_KEY = "sweep.ui.v1";
+let ui = {};
+try{ ui = JSON.parse(localStorage.getItem(UI_KEY)) || {}; }catch(e){}
+const uiOpen = k => ui[k] != null ? !!ui[k] : (k === "fn" && !isMobile());
+try{ lineup = (JSON.parse(localStorage.getItem(KEY)) || []).filter(n => OPS.has(n)); }catch(e){}
+// 本局禁用的盟约。游戏规则（教程原话 + 玩家实测，2026-11-11 改正过一次）：
+//   有核心盟约的干员只看核心盟约：只要有一个核心盟约没被禁，他就出现，附加盟约被不被禁都不影响
+//     （实测：禁突袭、不禁阿戈尔，斯卡蒂照常出现）；核心盟约全被禁才不出现
+//   没有核心盟约的干员：所有附加盟约都被禁才不出现
+//   被禁的核心盟约不能激活；被禁的附加盟约只是干员不全，靠别的盟约进场的干员照样能把它凑出来
+const BAN_KEY = "sweep.banned.v1";
+let banned = new Set();
+try{ banned = new Set((JSON.parse(localStorage.getItem(BAN_KEY)) || []).filter(n => BONDS.has(n))); }catch(e){}
+const saveBan = () => { try{ localStorage.setItem(BAN_KEY, JSON.stringify([...banned])); }catch(e){} };
+let showOut = false;
+function isOut(o){
+  if(!banned.size) return false;
+  const core = o.bonds.filter(b => BONDS.get(b) && BONDS.get(b).kind === "core");
+  const extra = o.bonds.filter(b => BONDS.get(b) && BONDS.get(b).kind === "extra");
+  if(core.length) return core.every(b => banned.has(b));
+  return extra.length > 0 && extra.every(b => banned.has(b));
+}
+// 自选编队（社区叫「外援」）：143 人名单之外的 6 星干员。规则来自游戏数据表：
+//   Ⅴ 阶、Ⅵ 阶各 6 格；每局每阶最多上 2 个；盟约按干员所属势力定，没有对应盟约的算协防干员；外援没有特质。
+//   所属核心盟约本局被禁的，上不了场。
+const EXTDATA = window.SWEEP_EXT || {operators: [], rules: {}};
+const EXTS = new Map(EXTDATA.operators.map(o => [o.name, o]));
+const EXT_KEY = "sweep.ext.v1";
+const EXT_SLOTS = 6, EXT_PER_GAME = 2;
+let ext = {5: [], 6: [], on: []};        // 两个阶各自的自选池 + 本局上场的名单
+try{ const e = JSON.parse(localStorage.getItem(EXT_KEY)); if(e) ext = {5: (e[5] || []).filter(n => EXTS.has(n)), 6: (e[6] || []).filter(n => EXTS.has(n)), on: (e.on || []).filter(n => EXTS.has(n))}; }catch(e){}
+const saveExt = () => { try{ localStorage.setItem(EXT_KEY, JSON.stringify(ext)); }catch(e){} };
+const extTier = n => ext[5].includes(n) ? 5 : ext[6].includes(n) ? 6 : null;
+const extBanned = o => { const c = o.bonds.filter(b => BONDS.get(b) && BONDS.get(b).kind === "core"); return c.length > 0 && c.every(b => banned.has(b)); };
+const extFielded = () => ext.on.filter(n => extTier(n) && !extBanned(EXTS.get(n)));
+const extAsOp = n => { const o = EXTS.get(n); return {name: o.name, tier: extTier(n) || 6, bonds: o.bonds, avatar: o.avatar, ext: true}; };
+// 阵容库：从攻略一图流誊录的成型阵容。选中一套后，干员池里会标出这套阵容用到的干员和所在阶段。
+const BUILDS = (window.SWEEP_BUILDS || {builds: []}).builds;
+const BUILD_KEY = "sweep.build.v1";
+let activeBuild = null;
+try{ activeBuild = localStorage.getItem(BUILD_KEY) || null; }catch(e){}
+if(activeBuild && !BUILDS.some(b => b.id === activeBuild)) activeBuild = null;
+const buildOf = () => BUILDS.find(b => b.id === activeBuild) || null;
+let buildStageCache = null;
+// 一套阵容里出现过的所有干员 -> 最早出现在哪个阶段
+function buildNames(b){
+  const m = new Map();
+  for(const st of b.stages) for(const n of [...(st.ops || []), ...(st.bench || [])]) if(!m.has(n)) m.set(n, st.short || st.label);
+  for(const x of (b.extras || [])) for(const n of (x.ops || [])) if(!m.has(n)) m.set(n, x.short || "可选");
+  return m;
+}
+function buildStageOf(name){
+  const b = buildOf(); if(!b) return null;
+  if(!buildStageCache || buildStageCache.id !== b.id) buildStageCache = {id: b.id, m: buildNames(b)};
+  return buildStageCache.m.get(name) || null;
+}
+// 叠层分析：这套阵容的每个盟约，阵容里谁在给它加层。按特质数据算，不是攻略原话。
+//   核心 = 这个干员是该盟约的 key 牌（数值第一 / 攻略强调 / 玩家反馈）
+//   重点盟约 = 阵容里有它的核心牌；一个都没有时，取阵容里加层干员最多的那个
+function buildStack(b){
+  const names = buildNames(b), src = IDX.bondSources || {};
+  const isCore = (n, bond) => (meta(n).keyFor || []).includes(bond) || (src[bond] || []).some(r => r.op === n && r.key);
+  const perRound = y => { const m = /(\d+)\s*\/\s*回合/.exec(y || ""); return m ? +m[1] : 0; };   // 「至多 12/回合」-> 12，用来排先后
+  const bonds = (b.bonds || []).map(bond => {
+    const all = src[bond] || [];
+    const rows = all.filter(r => names.has(r.op)).map(r => ({op: r.op, y: r.yield, core: isCore(r.op, bond), stage: names.get(r.op)}));
+    rows.sort((x, y) => (y.core - x.core) || perRound(y.y) - perRound(x.y));
+    const others = all.filter(r => !names.has(r.op) && OPS.has(r.op)).map(r => ({op: r.op, y: r.yield, core: isCore(r.op, bond)}));
+    return {bond, rows, others, focus: rows.some(r => r.core)};
+  });
+  if(!bonds.some(x => x.focus)){ const top = bonds.filter(x => x.rows.length).sort((x, y) => y.rows.length - x.rows.length)[0]; if(top) top.focus = true; }
+  const cm = new Map();   // 干员 -> {是哪些盟约的核心, 加层数值}
+  for(const x of bonds) for(const r of x.rows) if(r.core){ const c = cm.get(r.op) || {bonds: [], y: r.y, n: perRound(r.y)}; c.bonds.push(x.bond); cm.set(r.op, c); }
+  const cores = new Map([...cm].sort((x, y) => y[1].n - x[1].n));   // 每回合给得多的排前面
+  const gen = new Map((IDX.generic || []).map(r => [r.op, r]));
+  const helpers = [...names.keys()].filter(n => OPS.has(n) && !cores.has(n) && (gen.has(n) || meta(n).tags.includes("通用叠层")))
+    .map(n => ({op: n, y: gen.has(n) ? gen.get(n).yield + "，给" + gen.get(n).scope : "", stage: names.get(n)}));
+  const amps = [...names.keys()].filter(n => OPS.has(n) && meta(n).tags.includes("叠层放大")).map(n => ({op: n, stage: names.get(n)}));
+  return {bonds, cores, helpers, amps};
+}
+// 本局禁用对一套阵容的影响。level：0 能打，1 受影响，2 核心被禁。
+//   核心被禁 = 它的核心盟约被禁，或最后一个阶段（大成阵容）里的叠层核心出不来，或大成阵容缺了一半以上的人。
+//   只在前期用、后面放整备区的 key 牌（比如复奏）被禁不算「核心被禁」，算「受影响」。
+function buildBan(b){
+  const names = buildNames(b);
+  const bonds = (b.bonds || []).filter(x => banned.has(x));
+  const coreBonds = bonds.filter(x => BONDS.get(x) && BONDS.get(x).kind === "core");
+  const gone = n => OPS.has(n) ? isOut(OPS.get(n)) : (EXTS.has(n) && extBanned(EXTS.get(n)));
+  const out = banned.size ? [...names.keys()].filter(gone) : [];
+  const main = new Set(b.stages.flatMap(st => [...(st.ops || []), ...(st.bench || [])]));
+  const outMain = out.filter(n => main.has(n));
+  const sc = window.SWEEP_INDEX ? buildStack(b).cores : new Map();
+  const last = b.noFinal ? null : ([...b.stages].reverse().find(st => (st.ops || []).length) || null);   // noFinal：攻略没报完整的成型阵容
+  const lastOut = last ? last.ops.filter(n => out.includes(n)) : [];
+  const cores = lastOut.filter(n => sc.has(n));
+  const half = !!last && lastOut.length * 2 >= last.ops.length;
+  const level = (coreBonds.length || cores.length || half) ? 2 : (bonds.length || outMain.length) ? 1 : 0;
+  return {level, bonds, coreBonds, out, outMain, cores, last, lastOut, names};
+}
+const BAN_TAG = [["ok", "这局能打"], ["warnp", "受影响"], ["badp", "核心被禁"]];
+function banWhy(r){
+  const p = [];
+  if(r.coreBonds.length) p.push("核心盟约【" + r.coreBonds.join("、") + "】被禁");
+  const eb = r.bonds.filter(x => !r.coreBonds.includes(x));
+  if(eb.length) p.push("附加盟约【" + eb.join("、") + "】干员不全");
+  if(r.cores.length) p.push("叠层核心 " + r.cores.join("、") + " 不会出现");
+  const rest = r.out.filter(n => !r.cores.includes(n));
+  if(rest.length) p.push((r.cores.length ? "另有 " : "") + rest.slice(0, 5).join("、") + (rest.length > 5 ? " 等 " + rest.length + " 人" : "") + " 不会出现");
+  if(r.last && r.lastOut.length) p.push("「" + r.last.label + "」缺 " + r.lastOut.length + " / " + r.last.ops.length + " 人");
+  return p.join("；");
+}
+const banCount = () => [0, 1, 2].map(l => BUILDS.filter(b => buildBan(b).level === l).length);
+
+/* ---------- 我的阵容：存在这台设备上；可以生成链接发给别人 ---------- */
+const MINE_KEY = "sweep.mine.v1";
+const newId = () => "m" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+function cleanPack(m){   // 存档和分享链接里的内容都过一遍：只留认得的干员，文字限长，id 只能是字母数字
+  m = m || {};
+  return {id: /^[a-z0-9]{1,24}$/.test(m.id || "") ? m.id : newId(),
+    n: String(m.n || "").trim().slice(0, 30) || "未命名", t: String(m.t || "").slice(0, 2000),
+    o: [...new Set((Array.isArray(m.o) ? m.o : []).filter(n => OPS.has(n)))].slice(0, 30),
+    x: (Array.isArray(m.x) ? m.x : []).filter(e => Array.isArray(e) && EXTS.has(e[0]) && (e[1] === 5 || e[1] === 6)).map(e => [e[0], e[1]]).slice(0, 4)};
+}
+let mine = [];
+try{ mine = (JSON.parse(localStorage.getItem(MINE_KEY)) || []).map(cleanPack); }catch(e){}
+const saveMine = () => { try{ localStorage.setItem(MINE_KEY, JSON.stringify(mine)); }catch(e){} };
+let mineDraft = null, incoming = null;
+function loadPack(m){
+  lineup = m.o.filter(n => OPS.has(n));
+  ext.on = [];
+  for(const [n, t] of m.x){
+    if(!extTier(n) && ext[t].length < EXT_SLOTS) ext[t].push(n);
+    const tt = extTier(n);
+    if(tt && ext.on.filter(k => extTier(k) === tt).length < EXT_PER_GAME) ext.on.push(n);
+  }
+  save(); saveExt(); render();
+}
+const b64e = str => btoa(String.fromCharCode(...new TextEncoder().encode(str))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+const b64d = str => new TextDecoder().decode(Uint8Array.from(atob(str.replace(/-/g, "+").replace(/_/g, "/")), c => c.charCodeAt(0)));
+const shareUrl = m => location.href.split("#")[0] + "#s=" + b64e(JSON.stringify({n: m.n, o: m.o, x: m.x, t: m.t.slice(0, 800)}));
+// 保存时勾了「同时匿名发给作者」才发：只有阵容内容和当时的禁用，没有任何身份信息。发不出去就算了，不影响保存
+const SUBMIT_URL = "https://old-wildebeest-d6g1fnfvj68d6a0ae.service.tcloudbase.com/submit";
+function sendPack(m){
+  try{
+    const body = JSON.stringify({n: m.n, t: m.t, o: m.o, x: m.x, ban: [...banned]});
+    if(navigator.sendBeacon && navigator.sendBeacon(SUBMIT_URL, new Blob([body], {type: "text/plain"}))) return;
+    fetch(SUBMIT_URL, {method: "POST", mode: "no-cors", keepalive: true, body: body});
+  }catch(e){}
+}
+// 意见反馈：发到云端 feedback 表。只发用户自己写的内容、选填的联系方式、当时在看哪套阵容
+const FEEDBACK_URL = "https://old-wildebeest-d6g1fnfvj68d6a0ae.service.tcloudbase.com/feedback";
+const FB_KINDS = [["bug", "出错了"], ["build", "阵容 / 数据有误"], ["idea", "想要的功能"], ["other", "其他"]];
+let fbDraft = {k: "", t: "", c: ""}, fbSending = false;
+function showFeedback(){
+  setView("feedback", showFeedback);
+  openSheet('<div class="head"><div><h2>意见反馈</h2></div><button class="x" data-close="1" aria-label="关闭">✕</button></div>' +
+    '<div class="chips" style="margin:0 0 10px">' + FB_KINDS.map(k => '<button class="chip core' + (fbDraft.k === k[0] ? " on" : "") + '" data-fbkind="' + k[0] + '">' + k[1] + '</button>').join("") + '</div>' +
+    '<div class="mform"><textarea id="fbText" maxlength="2000" placeholder="想说的话">' + esc(fbDraft.t) + '</textarea>' +
+    '<input id="fbContact" maxlength="80" placeholder="联系方式（选填）" value="' + esc(fbDraft.c) + '" style="margin-top:8px"></div>' +
+    '<div class="acts"><button class="btn primary" data-fbsend="1"' + (fbSending ? " disabled" : "") + '>' + (fbSending ? "发送中…" : "发送") + '</button><button class="btn" data-close="1">取消</button></div>');
+}
+function fbKeep(){ const t = $("fbText"), c = $("fbContact"); if(t) fbDraft.t = t.value; if(c) fbDraft.c = c.value; }
+function sendFeedback(){
+  fbKeep();
+  const text = fbDraft.t.trim();
+  if(text.length < 2){ toast("先写几句再发"); const t = $("fbText"); if(t) t.focus(); return; }
+  fbSending = true; showFeedback();
+  const body = JSON.stringify({k: fbDraft.k || "other", t: text, c: fbDraft.c.trim(), b: activeBuild || curBuild || "", p: "index"});
+  fetch(FEEDBACK_URL, {method: "POST", body: body}).then(r => r.ok ? r.json() : Promise.reject(r.status)).then(() => {
+    fbSending = false; fbDraft = {k: "", t: "", c: ""}; stat("fb_sent"); closeSheet(); toast("已发送，谢谢");
+  }).catch(() => { fbSending = false; showFeedback(); toast("没发出去，过一会儿再试"); });
+}
+// 没认出的截图：用户点了「发给作者」才发。先缩到长边 1600 以内、转成 JPEG，跟意见反馈走同一个接口
+function sendShot(){
+  const s = shotFail; if(!s || s.state === "sending" || s.state === "sent") return;
+  s.state = "sending"; showBan();
+  const url = URL.createObjectURL(s.file), img = new Image();
+  const fail = () => { URL.revokeObjectURL(url); s.state = "error"; if(sameView("ban")) showBan(); };
+  img.onerror = fail;
+  img.onload = () => {
+    try{
+      const k = Math.min(1, 1600 / Math.max(img.naturalWidth, img.naturalHeight));
+      const c = document.createElement("canvas"); c.width = Math.round(img.naturalWidth * k); c.height = Math.round(img.naturalHeight * k);
+      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(url);
+      let q = 0.82, data = c.toDataURL("image/jpeg", q);
+      while(data.length > 1150000 && q > 0.35){ q -= 0.15; data = c.toDataURL("image/jpeg", q); }
+      const body = JSON.stringify({k: "shot", t: "截图没认出：" + s.info, c: "", b: activeBuild || "", p: "index", img: data.slice(data.indexOf(",") + 1)});
+      fetch(FEEDBACK_URL, {method: "POST", body: body}).then(r => r.ok ? r.json() : Promise.reject(r.status)).then(() => {
+        s.state = "sent"; stat("shot_sent"); if(sameView("ban")) showBan(); toast("已发送，谢谢");
+      }).catch(() => { s.state = "error"; if(sameView("ban")) showBan(); });
+    }catch(e){ fail(); }
+  };
+  img.src = url;
+}
+function toast(msg){ const el = $("toast"); el.textContent = msg; el.classList.add("show"); clearTimeout(toast.h); toast.h = setTimeout(() => el.classList.remove("show"), 1800); }
+function copyText(text, ok){
+  if(navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(() => toast(ok), () => prompt("复制这个链接", text));
+  else prompt("复制这个链接", text);
+}
+function packAvs(m){
+  const im = (o, n, x) => o && o.avatar ? '<img src="' + esc(o.avatar) + '" alt="' + esc(n) + '" title="' + esc(n) + (x ? "（外援）" : "") + '" loading="lazy">' : "";
+  return '<div class="mavs">' + m.o.map(n => im(OPS.get(n), n)).join("") + m.x.map(e => im(EXTS.get(e[0]), e[0], true)).join("") + '</div>';
+}
+function mineHtml(){
+  const cur = lineup.length + extFielded().length;
+  return '<div class="acts" style="margin:0 0 10px"><button class="btn primary" data-minenew="1"' + (cur ? "" : " disabled") + '>保存当前阵容' + (cur ? "（" + cur + " 人）" : "") + '</button></div>' +
+    (mine.length ? mine.map(m => '<div class="mcard"><div class="bt">' + esc(m.n) + '</div>' + packAvs(m) + (m.t ? '<div class="mnote">' + esc(m.t) + '</div>' : "") +
+      '<div class="acts"><button class="btn primary" data-mineload="' + esc(m.id) + '">载入</button><button class="btn" data-mineshare="' + esc(m.id) + '">分享</button>' +
+      '<button class="btn" data-mineedit="' + esc(m.id) + '">编辑</button><button class="btn" data-minedel="' + esc(m.id) + '">删除</button></div></div>').join("")
+    : '<div class="fx"><span class="note">还没有保存的阵容</span></div>');
+}
+function showMineEdit(id){
+  const m = id === "new" ? mineDraft : mine.find(x => x.id === id); if(!m) return;
+  setView("mineedit", () => showMineEdit(id));
+  if(!sheetStack.some(v => v.key === "builds")) sheetStack.unshift({key: "builds", fn: () => showBuilds("mine"), scroll: 0});
+  openSheet('<div class="head"><div><h2>' + (id === "new" ? "保存阵容" : "编辑") + '</h2></div><button class="x" data-close="1" aria-label="关闭">✕</button></div>' +
+    '<div class="mform"><input id="mName" maxlength="30" placeholder="名字" value="' + esc(m.n) + '">' + packAvs(m) +
+    '<textarea id="mNote" maxlength="2000" placeholder="运营思路（选填）">' + esc(m.t) + '</textarea></div>' +
+    '<label class="chk"><input type="checkbox" id="mSend"' + (ui.send === false ? "" : " checked") + '>同时匿名发给作者</label>' +
+    '<div class="acts"><button class="btn primary" data-minesavefrm="' + esc(id === "new" ? "new" : m.id) + '">保存</button><button class="btn" data-btab="mine">取消</button></div>');
+}
+function showShared(){
+  const m = incoming; if(!m) return;
+  setView("shared", showShared);
+  openSheet('<div class="head"><div><h2>' + esc(m.n) + '</h2><div class="meta">分享的阵容</div></div><button class="x" data-close="1" aria-label="关闭">✕</button></div>' +
+    packAvs(m) + (m.t ? '<div class="fx" style="margin-top:10px">' + esc(m.t) + '</div>' : "") +
+    '<div class="acts"><button class="btn primary" data-sharedload="1">放进阵容区</button><button class="btn" data-sharedsave="1">存到我的阵容</button></div>');
+}
+function setBuild(id){ activeBuild = id; buildStageCache = null; try{ id ? localStorage.setItem(BUILD_KEY, id) : localStorage.removeItem(BUILD_KEY); }catch(e){} if(!id && filter.fn === "当前阵容") filter.fn = null; renderFilters(); render(); }
+const save = () => { try{ localStorage.setItem(KEY, JSON.stringify(lineup)); }catch(e){} };
+
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+/* ---------- 盟约计算 ----------
+   人数 = 阵容里带这个盟约的不同干员数。
+   调和：激活后，场上已有干员的核心盟约人数 +1。
+   独行：恰好 1 名时生效，2 名及以上失效。
+   绝技：按精锐干员数算，这里不知道谁是精锐，不统计。 */
+function calc(){
+  const raw = new Map(DATA.bonds.map(b => [b.name, 0]));
+  for(const n of lineup) for(const b of OPS.get(n).bonds) if(raw.has(b)) raw.set(b, raw.get(b)+1);
+  for(const n of extFielded()) for(const b of EXTS.get(n).bonds) if(raw.has(b)) raw.set(b, raw.get(b)+1);
+  const harmony = BONDS.has("调和") && raw.get("调和") >= BONDS.get("调和").need;
+  return DATA.bonds.map(b => {
+    const base = raw.get(b.name);
+    const plus = (harmony && b.kind === "core" && base > 0) ? 1 : 0;
+    const count = base + plus;
+    const steps = [b.need, ...b.thresholds.filter(t => t > b.need)];
+    let state = "idle", level = 0, text = "";
+    if(banned.has(b.name) && b.kind === "core"){ state = "banned"; text = "本局禁用"; }
+    else if(b.name === "绝技"){ state = "manual"; text = "按精锐干员数计算，不自动统计"; }
+    else if(b.name === "独行"){
+      if(count === 1){ state = "active"; level = 1; text = "已激活"; }
+      else if(count >= 2){ state = "broken"; text = "失效：在场 2 名及以上"; }
+    } else {
+      level = steps.filter(t => count >= t).length;
+      if(level > 0){
+        state = "active";
+        const next = steps[level];
+        text = level === 1 ? "已激活" : "已进阶（" + steps[level-1] + " 人）";
+        if(next) text += "，进阶还差 " + (next - count) + " 人";
+      } else if(count > 0) text = "还差 " + (b.need - count) + " 人激活";
+    }
+    if(banned.has(b.name) && b.kind !== "core") text = (text ? text + "，" : "") + "本局干员不全";
+    return {b, base, plus, count, steps, state, level, text};
+  }).sort((x, y) => rank(x) - rank(y) || y.count - x.count);
+}
+const rank = r => r.state === "banned" ? 9 : r.state === "active" ? 0 : r.state === "broken" ? 1 : r.count > 0 ? 2 : 3;
+
+/* ---------- 渲染 ---------- */
+function opCard(o, opts){
+  opts = opts || {};
+  const lit = opts.lit || new Set();
+  const av = o.avatar ? '<img src="' + esc(o.avatar) + '" alt="" loading="lazy" draggable="false">' : esc(o.name[0]);
+  const stg = (!o.ext && !opts.noStage) ? buildStageOf(o.name) : null;
+  return '<div class="op' + (opts.picked ? " picked" : "") + (o.ext ? " ext" : isOut(o) ? " out" : "") + (opts.cls || "") + (stg ? " inb" : "") + '" style="--tc:var(--t' + o.tier + ')" draggable="true" data-op="' + esc(o.name) +
+    '" data-from="' + (opts.from || "pool") + '" title="' + esc(o.name) + '">' +
+    '<div class="av">' + av + badges(o.name) + '</div>' + (stg ? '<span class="stg">' + esc(stg) + '</span>' : "") + '<div class="nm">' + esc(o.name) + '</div>' +
+    '<div class="tags">' + o.bonds.map(b => '<b class="' + (lit.has(b) ? "lit" : "") + '">' + bondIcon(b) + esc(b) + '</b>').join("") + '</div>' +
+    '<button class="info" data-info="' + esc(o.name) + '" aria-label="查看特质">i</button></div>';
+}
+
+function renderPool(){
+  const picked = new Set(lineup);
+  const fnTest = filter.fn === "当前阵容" ? ((m, name) => !!buildStageOf(name)) : filter.fn && (FN.find(f => f[0] === filter.fn) || [])[1];
+  let html = "";
+  for(let t = 1; t <= 6; t++){
+    const list = DATA.operators.filter(o => o.tier === t && (showOut || !isOut(o)) &&
+      (!filter.core || o.bonds.includes(filter.core)) && (!filter.extra || o.bonds.includes(filter.extra)) && (!fnTest || fnTest(meta(o.name), o.name)) &&
+      (!filter.when.length || whenOf(o).some(w => filter.when.includes(w))) && (!query || o.name.includes(query)));
+    if(!list.length) continue;
+    html += '<div class="tier" style="--tc:var(--t' + t + ')"><h3><i></i>' + ROMAN[t] + ' 阶 <span>' + list.length + ' 名</span></h3><div class="grid">' +
+      list.map(o => opCard(o, {picked: picked.has(o.name)})).join("") + '</div></div>';
+  }
+  const nOut = DATA.operators.filter(isOut).length;
+  if(nOut) html = '<div class="outbar">本局禁用了 ' + banned.size + ' 个盟约，' + nOut + ' 名干员不会出现。' +
+    '<button class="lnk" data-showout="1">' + (showOut ? "隐藏他们" : "显示他们") + '</button><button class="lnk" data-banopen="1">修改</button></div>' + html;
+  const ab = buildOf();
+  if(ab) html = '<div class="outbar build">正在对照阵容：<b>' + esc(ab.name) + '</b><span class="note">（' + esc(ab.source.author) + '）</span>' + (banned.size ? (r => r.out.length ? '<span class="tagp ' + BAN_TAG[r.level][0] + '">本局 ' + r.out.length + ' 人被禁</span>' : "")(buildBan(ab)) : "") +
+    '<button class="lnk" data-buildopen="' + esc(ab.id) + '">看运营</button><button class="lnk" data-f="当前阵容" data-g="fn">只看这套的干员</button><button class="lnk" data-buildoff="1">取消</button></div>' + html;
+  $("banBtn").textContent = banned.size ? "本局禁用 · " + banned.size : "本局禁用";
+  $("banBtn").classList.toggle("primary", banned.size > 0);
+  $("poolList").innerHTML = html || '<p style="color:var(--dim);padding:30px 0;text-align:center">没有符合条件的干员</p>';
+}
+
+function renderFilters(){
+  const row = (kind, label) => '<div class="frow"><span class="flabel">' + label + '</span><div class="chips">' +
+    '<button class="chip core' + (filter[kind] ? "" : " on") + '" data-f="" data-g="' + kind + '">全部</button>' +
+    DATA.bonds.filter(b => b.kind === kind && (b.membersFromDb || []).length).map(b =>
+      '<button class="chip core' + (filter[kind] === b.name ? " on" : "") + (banned.has(b.name) ? " off" : "") + '" data-f="' + esc(b.name) + '" data-g="' + kind + '">' +
+      bondIcon(b.name) + esc(b.name) + '</button>').join("") + '</div></div>';
+  const fnRow = !window.SWEEP_INDEX ? "" : '<div class="frow"><span class="flabel">功能</span><div class="chips">' +
+    '<button class="chip core' + (filter.fn ? "" : " on") + '" data-f="" data-g="fn">全部</button>' +
+    (activeBuild ? '<button class="chip core hl' + (filter.fn === "当前阵容" ? " on" : "") + '" data-f="当前阵容" data-g="fn">当前阵容</button>' : "") +
+    FN.map(f => '<button class="chip core' + (filter.fn === f[0] ? " on" : "") + '" data-f="' + f[0] + '" data-g="fn">' + f[0] + '</button>').join("") +
+    '</div></div>';
+  const whenRow = '<div class="frow"><span class="flabel">触发</span><div class="chips">' +
+    '<button class="chip core' + (filter.when.length ? "" : " on") + '" data-f="" data-g="when">全部</button>' +
+    WHEN.map(w => '<button class="chip core' + (filter.when.includes(w) ? " on" : "") + '" data-f="' + w + '" data-g="when">' + w + '</button>').join("") +
+    '</div></div>';
+  const fnOpen = !!fnRow && (uiOpen("fn") || !!filter.fn || !!filter.when.length), lgOpen = !!fnRow && uiOpen("lg");
+  $("filterChips").innerHTML = row("core", "阵营") + row("extra", "职业") + (fnOpen ? fnRow + whenRow : "") +
+    (fnRow ? '<div class="morebar"><button data-ui="fn" class="' + (fnOpen ? "on" : "") + '">' + (fnOpen ? "▾" : "▸") + " 按功能 / 触发筛选" + '</button>' +
+      '<button data-ui="lg" class="' + (lgOpen ? "on" : "") + '">' + (lgOpen ? "▾" : "▸") + ' 角标说明</button></div>' : "");
+  $("legend").hidden = !lgOpen;
+}
+function bondIcon(name){
+  const b = BONDS.get(name);
+  return b && b.icon ? '<img class="bi" src="' + esc(b.icon) + '" alt="" draggable="false">' : "";
+}
+
+function renderTeam(res){
+  const lit = new Set(res.filter(r => r.state === "active").map(r => r.b.name));
+  const xs = extFielded();
+  $("extBtn").textContent = xs.length ? "自选编队 · " + xs.length : "自选编队";
+  $("extBtn").classList.toggle("primary", xs.length > 0);
+  const nTeam = lineup.length + xs.length;
+  $("teamGrid").innerHTML = lineup.map(n => opCard(OPS.get(n), {from: "team", lit})).join("") + xs.map(n => opCard(extAsOp(n), {from: "extteam", lit})).join("") +
+    '<div class="slot"></div>'.repeat(Math.max(0, TEAM_SLOTS - nTeam));
+  $("teamN").textContent = nTeam + " 人";
+  $("clearBtn").hidden = !lineup.length;
+  $("saveBtn").hidden = !(lineup.length + xs.length);
+  $("teamCount").textContent = "已上阵 " + (lineup.length + xs.length) + " 人" + (xs.length ? "（含外援 " + xs.length + "）" : "");
+  $("teamHint").textContent = (lineup.length + xs.length) ? (isMobile() ? "点头像移除，长按看特质" : "点击移除，或拖回干员池") : "";
+}
+
+function renderBonds(res){
+  const row = r => {
+    const cls = r.state === "banned" ? " zero banned" : r.state === "active" ? " active" : r.state === "broken" ? " broken" : r.count === 0 ? " zero" : "";
+    const steps = r.state === "manual" ? "" : r.steps.map((t, i) => '<span class="step' + (i < r.level ? " hit" : "") + '">' + t + '</span>').join("");
+    return '<button class="bond' + cls + '" data-bond="' + esc(r.b.name) + '"><div class="row"><span class="bn">' + bondIcon(r.b.name) + esc(r.b.name) + '</span>' +
+      '<span class="kind">' + (r.b.kind === "core" ? "核心" : "附加") + '</span>' + (r.plus ? '<span class="plus">调和 +1</span>' : "") +
+      '<span class="cnt">' + (r.state === "manual" ? "—" : r.count + " / " + r.b.need) + '</span></div>' +
+      '<div class="steps">' + steps + '<span class="st">' + esc(r.text) + '</span></div></button>';
+  };
+  const on = res.filter(r => r.state === "active" || r.state === "broken");
+  const part = res.filter(r => r.state !== "active" && r.state !== "broken" && r.state !== "banned" && r.count > 0);
+  const rest = res.filter(r => (r.count === 0 && r.state !== "broken") || r.state === "banned");
+  let html = "";
+  if(on.length) html += '<div class="bgroup">已激活 ' + on.filter(r => r.state === "active").length + ' 个</div>' + on.map(row).join("");
+  if(part.length) html += '<div class="bgroup">未凑齐</div>' + part.map(row).join("");
+  html += '<div class="bgroup">' + (on.length || part.length ? "其他盟约" : "全部盟约") + '</div>' + rest.map(row).join("");
+  $("bondList").innerHTML = html;
+
+  const chips = res.filter(r => r.count > 0 && r.state !== "banned");
+  $("bondChips").innerHTML = chips.map(r => '<button class="bchip' + (r.state === "active" ? " active" : r.state === "broken" ? " broken" : "") +
+      '" data-bond="' + esc(r.b.name) + '">' + bondIcon(r.b.name) + esc(r.b.name) + '<b>' + r.count + '/' + (r.steps[r.level] || r.steps[r.steps.length-1]) + '</b></button>').join("") +
+    '<button class="bchip all" data-allbonds="1">全部盟约 ›</button>';
+}
+
+function render(){
+  const res = calc();
+  renderTeam(res); renderBonds(res); renderPool();
+}
+
+/* ---------- 阵容操作 ---------- */
+function add(name){ if(OPS.has(name) && !lineup.includes(name)){ lineup.push(name); save(); render(); } }
+function remove(name){ const i = lineup.indexOf(name); if(i >= 0){ lineup.splice(i, 1); save(); render(); } }
+function toggle(name){ lineup.includes(name) ? remove(name) : add(name); }
+
+/* ---------- 详情 ---------- */
+function fx(text){
+  if(!text) return '<span class="note">（无）</span>';
+  return esc(text).split("\n").map(line => {
+    if(line.trim() === "---") return "<hr>";
+    line = line.replace(/&lt;([^&]+?)&gt;/g, '<span class="cond">&lt;$1&gt;</span>');
+    return /^\s*[※（(]/.test(line) ? '<span class="note">' + line + '</span>' : line;
+  }).join("\n").replace(/\n?<hr>\n?/g, "<hr>");
+}
+/* 弹层的层级。每个 show…() 开头用 setView(key, 重画函数) 报到：
+   - 弹层开着、又换了一个 key → 原来那层进栈，新的一层左上角出现「‹」
+   - key 和当前一样 → 只是重画，不进栈；key 在栈里已经有 → 退回到那一层
+   「‹」和系统返回键（手机侧滑）回到上一层并恢复滚动位置；「✕」、点遮罩、Esc 全部关掉 */
+let sheetStack = [], curView = null, sheetHist = false;
+const sameView = key => $("mask").classList.contains("show") && !!curView && curView.key === key;
+function setView(key, fn){
+  if(!$("mask").classList.contains("show")) sheetStack = [];
+  else if(curView && curView.key !== key){
+    const i = sheetStack.findIndex(v => v.key === key);
+    if(i >= 0) sheetStack.length = i;
+    else sheetStack.push({key: curView.key, fn: curView.fn, scroll: $("sheet").scrollTop});
+  }
+  curView = {key, fn};
+}
+function openSheet(html, tall){
+  const sh = $("sheet"); sh.innerHTML = html; sh.scrollTop = 0; sh.scrollLeft = 0; sh.classList.toggle("tall", !!tall);
+  if(sheetStack.length){ const head = sh.querySelector(".head"); if(head) head.insertAdjacentHTML("afterbegin", '<button class="x back" data-back="1" aria-label="返回">‹</button>'); }
+  if(!$("mask").classList.contains("show")){ $("mask").classList.add("show"); try{ history.pushState({sheet: 1}, ""); sheetHist = true; }catch(e){} }
+}
+function closeSheet(fromPop){
+  if(!$("mask").classList.contains("show")) return;
+  $("mask").classList.remove("show"); sheetStack = []; curView = null;
+  const had = sheetHist; sheetHist = false;
+  if(had && fromPop !== true){ try{ history.back(); }catch(e){} }
+}
+function sheetBack(){
+  const v = sheetStack.pop(); if(!v) return closeSheet();
+  curView = null; v.fn(); $("sheet").scrollTop = v.scroll || 0;
+}
+window.addEventListener("popstate", () => {
+  if(!$("mask").classList.contains("show")) return;
+  if(sheetStack.length){ sheetBack(); try{ history.pushState({sheet: 1}, ""); }catch(e){} }
+  else closeSheet(true);
+});
+
+function showOp(name){
+  const o = OPS.get(name); if(!o) return EXTS.has(name) ? showExtOp(name) : undefined;
+  setView("op:" + name, () => showOp(name));
+  const inTeam = lineup.includes(name);
+  openSheet('<div class="head" style="--tc:var(--t' + o.tier + ')"><div class="av">' + (o.avatar ? '<img src="' + esc(o.avatar) + '" alt="">' : "") + '</div>' +
+    '<div><h2>' + esc(o.name) + '</h2><div class="meta">' + ROMAN[o.tier] + ' 阶 · ' + esc(o.traitType || "") + '</div>' +
+    '<div class="chips" style="margin-top:6px;flex-wrap:wrap">' + o.bonds.map(b => '<button class="chip core" data-bond="' + esc(b) + '">' + bondIcon(b) + esc(b) + ' ›</button>').join("") + '</div></div>' +
+    '<button class="x" data-close="1" aria-label="关闭">✕</button></div>' +
+    opSkills(o.name) + opEquip(o.name) + opMeta(o.name) +
+    '<h4>特质 1</h4><div class="fx">' + fx(o.trait1) + '</div>' +
+    (o.trait2 ? '<h4>特质 2</h4><div class="fx">' + fx(o.trait2) + '</div>' : "") +
+    '<div class="acts"><button class="btn primary" data-toggle="' + esc(o.name) + '">' + (inTeam ? "移出阵容" : "加入阵容") + '</button></div>');
+}
+
+// 推荐装备：攻略视频里点名给这个干员的装备说法 + 攻略阵容里给他带的装备（equip_tips.js 的 byOp）
+function opEquip(name){
+  const E = window.SWEEP_EQTIPS; const rows = E && E.byOp && E.byOp[name]; if(!rows || !rows.length) return "";
+  const secs = t => { const m = /^(\d+):(\d+)$/.exec(t || ""); return m ? +m[1] * 60 + +m[2] : 0; };
+  const row = r => '<div class="eqr"><span class="eqi">' + r.items.map(i => E.icons[i] ? '<img src="' + esc(E.icons[i]) + '" alt="' + esc(i) + '" title="' + esc(i) + '" loading="lazy">' : "").join("") + '</span>' +
+    '<div class="eqb"><span class="eqn">' + esc(r.items.join("、")) + '</span>　' + (r.text ? '<span class="eqt">' + esc(r.text) + '</span>' : '<span class="eqt">「' + esc(r.build) + '」里给' + esc(name) + '带</span>') +
+    ' <a target="_blank" rel="noopener" href="https://www.bilibili.com/video/' + esc(r.bvid) + (secs(r.t) ? "?t=" + secs(r.t) : "") + '">— ' + esc(r.author) + '</a></div></div>';
+  const sorted = rows.filter(r => r.text).concat(rows.filter(r => !r.text)), first = sorted.slice(0, 6), more = sorted.slice(6);
+  return '<h4>推荐装备</h4><div class="fx eqs">' + first.map(row).join("") +
+    (more.length ? '<details class="gen"><summary>更多（' + more.length + '）</summary><div class="eqs">' + more.map(row).join("") + '</div></details>' : "") + '</div>';
+}
+
+function opSkills(name){
+  const r = meta(name).skills; if(!r || !r.length) return "";
+  const S = IDX.skillSources || {};
+  const who = x => { const m = S[x.src] || {}; return '<a class="lnk" target="_blank" rel="noopener" href="https://www.bilibili.com/video/' + esc(m.bvid || "") + '">' + esc(m.author || x.src) + '</a>'; };
+  const by = new Map(); for(const x of r) by.set(x.skill, [...(by.get(x.skill) || []), x]);
+  const body = by.size === 1 ? '<b>' + r[0].skill + ' 技能</b>'
+    : [...by].sort((a, b) => a[0] - b[0]).map(([k, xs]) => '<div><b>' + k + ' 技能</b><span class="note">　' + xs.map(who).join("、") + '</span></div>').join("");
+  return '<h4>推荐技能</h4><div class="fx metab">' + body + '</div>';
+}
+
+function opMeta(name){
+  const m = meta(name); if(!m.tags.length) return "";
+  let rows = "";
+  if((m.keyWhy || []).length) rows += '<div><span class="kmark inl">K</span> key 牌' + ((m.keyFor || []).length ? '：' + esc(m.keyFor.join("、")) : "") + '</div>';
+  if(m.stackTier) rows += '<div><span class="bdg stk s' + LV[m.stackTier] + '"><i></i><i></i><i></i></span> 叠层 · ' + m.stackTier + '<span class="note">　' + esc(m.stackBasis) + '</span></div>';
+  if(m.moneyTier) rows += '<div><span class="bdg coin c' + LV[m.moneyTier] + '">¥</span> 给钱 · ' + m.moneyTier + '<span class="note">　' + esc(m.moneyBasis) + '</span></div>';
+  const tags = m.tags.filter(t => !(t === "给层数" && m.stackTier) && !(t === "给钱" && m.moneyTier) && t !== "盟约核心");
+  if(tags.length) rows += '<div>' + tags.map(t => /^通用/.test(t) ? '<span class="tagp ok">' + esc(t) + '卡</span>' : '<span class="tagp">' + esc(t) + '</span>').join("") + '</div>';
+  return rows ? '<h4>功能</h4><div class="fx metab">' + rows + '</div>' : "";
+}
+
+function bondSources(name){
+  const rows = IDX.bondSources[name]; if(!rows) return "";
+  const line = r => { const o = OPS.get(r.op);
+    return '<div class="srow" data-info="' + esc(r.op) + '"><div class="av" style="--tc:var(--t' + o.tier + ')">' +
+      (o.avatar ? '<img src="' + esc(o.avatar) + '" alt="" loading="lazy">' : "") + '</div><div class="sb"><div>' + (r.key ? '<span class="kmark inl">K</span> ' : "") + '<b>' + esc(r.op) + '</b> ' +
+      '<span class="tagp">' + esc(r.when) + '</span><span class="tagp">' + esc(r.kind) + '</span>' + (r.needsActive ? "" : '<span class="tagp ok">无需激活</span>') + (r.stage ? '<span class="tagp ok">' + esc(r.stage) + '</span>' : "") +
+      (r.scope ? '<span class="tagp">' + esc(r.scope) + '</span>' : "") + '</div><div class="sy">' + esc(r.yield) + '</div></div></div>'; };
+  return '<h4>叠层来源（' + rows.length + '）</h4>' +
+    (rows.length ? '<div class="srcs">' + rows.map(line).join("") + '</div>' : '<div class="fx"><span class="note">无</span></div>') +
+    '<details class="gen"><summary>通用叠层（' + IDX.generic.length + '）</summary><div class="srcs">' + IDX.generic.map(line).join("") + '</div></details>';
+}
+
+function showBond(name){
+  const b = BONDS.get(name); if(!b) return;
+  setView("bond:" + name, () => showBond(name));
+  const r = calc().find(x => x.b.name === name);
+  const members = (b.membersFromDb || []).map(n => OPS.get(n)).filter(Boolean).sort((x, y) => x.tier - y.tier);
+  const picked = new Set(lineup);
+  const steps = [b.need, ...b.thresholds.filter(t => t > b.need)];
+  openSheet('<div class="head"><div><h2>' + bondIcon(b.name) + esc(b.name) + '</h2><div class="meta">' + (b.kind === "core" ? "核心盟约" : "附加盟约") +
+    ' · 激活 ' + b.need + ' 人' + (steps.length > 1 ? " · 进阶 " + steps.slice(1).join(" / ") + " 人" : "") +
+    (r.state === "manual" ? "" : " · 当前 " + r.count + " 人" + (r.plus ? "（含调和 +1）" : "")) + '</div>' +
+    (r.text ? '<div class="meta" style="color:' + (r.state === "active" ? "var(--accent)" : r.state === "broken" ? "var(--bad)" : "var(--dim)") + '">' + esc(r.text) + '</div>' : "") +
+    '</div><button class="x" data-close="1" aria-label="关闭">✕</button></div>' +
+    '<h4>效果</h4><div class="fx">' + fx(b.effect) + '</div>' +
+    (members.length ? '<h4>干员（' + members.length + '）</h4><div class="mini">' +
+      members.map(o => opCard(o, {picked: picked.has(o.name), from: "sheet"})).join("") + '</div>'
+      : "") +
+    bondSources(b.name) +
+    (members.length ? '<div class="acts"><button class="btn" data-filter="' + esc(b.name) + '">在干员池里只看这个盟约</button></div>' : ""));
+}
+
+/* ---------- 阵容库 ---------- */
+function srcLine(b){ const s = b.source;
+  return '<a class="lnk" target="_blank" rel="noopener" href="https://www.bilibili.com/video/' + esc(s.bvid) + '">' + esc(s.author) + '</a> · ' + esc(s.published.slice(5, 10)) +
+    ' · 播放 ' + (s.play >= 10000 ? (s.play / 10000).toFixed(1) + " 万" : s.play) + ' · 收藏率 ' + s.favRate + '%'; }
+let buildTab = "guide";
+function showBuilds(tab){
+  if(typeof tab === "string") buildTab = tab;
+  setView("builds", () => showBuilds());
+  const tabs = '<div class="tabs"><button data-btab="guide" class="' + (buildTab === "guide" ? "on" : "") + '">攻略阵容 ' + BUILDS.length + '</button>' +
+    '<button data-btab="mine" class="' + (buildTab === "mine" ? "on" : "") + '">我的阵容' + (mine.length ? " " + mine.length : "") + '</button></div>';
+  let body;
+  if(buildTab === "mine") body = mineHtml();
+  else {
+    const rs = new Map(BUILDS.map(b => [b.id, buildBan(b)]));
+    const list = !banned.size ? BUILDS : BUILDS.map((b, i) => [b, i])
+      .sort((x, y) => { const a = rs.get(x[0].id), c = rs.get(y[0].id);
+        return a.level - c.level || a.lastOut.length - c.lastOut.length || a.out.length - c.out.length || x[1] - y[1]; }).map(x => x[0]);
+    const cnt = [0, 1, 2].map(l => BUILDS.filter(b => rs.get(b.id).level === l).length);
+    const top = banned.size
+      ? '<div class="banbox ' + (cnt[0] ? "ok" : "warn") + '"><b>能打 ' + cnt[0] + '</b> · 受影响 ' + cnt[1] + ' · 核心被禁 ' + cnt[2] + '　<button class="lnk" data-banopen="1">改本局禁用</button></div>'
+      : '<div class="banbox tip">选了本局禁用，这里按能不能打排序　<button class="lnk" data-banopen="1">去选</button></div>';
+    // 卡片左边：这套的主力头像（最多两人）+ 主打盟约的图标；本局被禁、不会出现的变灰
+    const gone = n => OPS.has(n) ? isOut(OPS.get(n)) : (EXTS.has(n) && extBanned(EXTS.get(n)));
+    const heads = b => { const av = (b.carry || []).map(n => { const o = OPS.get(n) || EXTS.get(n) || {}, g = gone(n);
+        return o.avatar ? '<img class="cav' + (g ? " gone" : "") + '" src="' + esc(o.avatar) + '" alt="' + esc(n) + '" title="' + esc(n) + (g ? "（本局不会出现）" : "") + '" loading="lazy">' : ""; }).join("");
+      const mb = (b.bonds || [])[0], bo = mb && BONDS.get(mb);
+      const bi = bo && bo.icon ? '<img class="cbi' + (banned.has(mb) ? " gone" : "") + '" src="' + esc(bo.icon) + '" alt="' + esc(mb) + '" title="' + esc(mb) + '">' : "";
+      const si = (b.strategies || []).filter(x => x.icon).slice(0, 2).map(x => '<img class="csi" src="' + esc(x.icon) + '" alt="' + esc(x.name) + '" title="策略 ' + esc(x.name) + '" loading="lazy">').join("");
+      return av || bi || si ? '<span class="cvs">' + av + bi + si + '</span>' : ""; };
+    const card = b => { const r = rs.get(b.id), tag = BAN_TAG[r.level], why = banned.size ? banWhy(r) : "";
+      return '<button class="bcard' + (b.id === activeBuild ? " on" : "") + (banned.size ? " lv" + r.level : "") + '" data-buildopen="' + esc(b.id) + '">' +
+        '<div class="bhead">' + heads(b) + '<div class="bt">' + esc(b.name) + (banned.size ? '<span class="tagp ' + tag[0] + '">' + tag[1] + '</span>' : "") + (b.id === activeBuild ? '<span class="tagp ok">对照中</span>' : "") + '</div></div>' +
+        '<div class="tags2">' + (b.bonds || []).map(x => '<span class="tagp' + (banned.has(x) ? " off" : "") + '">' + bondIcon(x) + esc(x) + '</span>').join("") +
+        (b.strategies || []).map(x => '<span class="tagp ok">' + (x.icon ? '<img class="si" src="' + esc(x.icon) + '" alt="" loading="lazy">' : "") + '策略 ' + esc(x.name) + '</span>').join("") + '</div>' +
+        (why ? '<div class="note ' + (r.level === 2 ? "bad" : r.level === 1 ? "warn" : "") + '">' + esc(why) + '</div>' : "") +
+        (b.summary ? '<div class="note">' + esc(b.summary) + '</div>' : "") +
+        '<div class="note">' + esc(b.source.author) + ' · 播放 ' + (b.source.play >= 10000 ? (b.source.play / 10000).toFixed(1) + " 万" : b.source.play) + ' · 收藏率 ' + b.source.favRate + '%</div></button>'; };
+    body = BUILDS.length ? top + list.map(card).join("") : '<div class="fx"><span class="note">暂无</span></div>';
+  }
+  openSheet('<div class="head"><div><h2>阵容推荐</h2></div><button class="x" data-close="1" aria-label="关闭">✕</button></div>' + tabs + body);
+}
+let curBuild = null;
+function buildOps(names){
+  return '<div class="mini">' + names.map(n => OPS.has(n) ? opCard(OPS.get(n), {picked: lineup.includes(n), from: "build", noStage: true})
+    : '<div class="op" style="--tc:var(--t6)" data-info="' + esc(n) + '"><div class="av">' + (EXTS.has(n) && EXTS.get(n).avatar ? '<img src="' + esc(EXTS.get(n).avatar) + '" alt="">' : esc(n[0])) + '</div><div class="nm">' + esc(n) + '</div></div>').join("") + '</div>';
+}
+// 小胶囊：头像 + 名字 + 补充说明，点一下看这个干员
+function sop(n, extra, cls){
+  const o = OPS.get(n) || EXTS.get(n) || {};
+  const gone = OPS.has(n) ? isOut(OPS.get(n)) : (EXTS.has(n) && extBanned(EXTS.get(n)));
+  return '<span class="sop' + (cls || "") + (gone ? " out" : "") + '" data-info="' + esc(n) + '">' + (o.avatar ? '<img src="' + esc(o.avatar) + '" alt="" loading="lazy">' : "") +
+    '<b>' + esc(n) + '</b>' + (extra ? '<span class="y">' + esc(extra) + '</span>' : "") + (gone ? '<span class="tagp badp">禁</span>' : "") + '</span>';
+}
+function buildBanHtml(b){
+  if(!banned.size) return "";
+  const r = buildBan(b), tag = BAN_TAG[r.level];
+  if(!r.bonds.length && !r.out.length) return '<div class="banbox ok"><span class="tagp ok">这局能打</span></div>';
+  return '<div class="banbox ' + (r.level === 2 ? "" : r.level === 1 ? "warn" : "ok") + '"><span class="tagp ' + tag[0] + '">' + tag[1] + '</span>' + esc(banWhy(r)) +
+    (r.out.length ? '<div style="margin-top:6px">' + r.out.map(n => sop(n, r.names.get(n), r.cores.includes(n) ? " core" : "")).join("") + '</div>' : "") + '</div>';
+}
+function buildStackHtml(b){
+  if(!window.SWEEP_INDEX) return "";
+  const s = buildStack(b), focus = s.bonds.filter(x => x.focus).map(x => x.bond);
+  const none = '<span class="note">无</span>';
+  const line = (label, body) => '<div class="stk-row"><div class="stk-b">' + label + '</div><div class="stk-o">' + body + '</div></div>';
+  const rows = s.bonds.map(x => line(
+    '<button class="chip core' + (banned.has(x.bond) ? " ban" : "") + '" data-bond="' + esc(x.bond) + '">' + bondIcon(x.bond) + esc(x.bond) + '</button>' + (x.focus ? '<span class="tagp ok">重点</span>' : ""),
+    (x.rows.length ? x.rows.map(r => sop(r.op, r.y + " · " + r.stage, r.core ? " core" : "")).join("") : none) +
+    (x.others.length ? '<details class="gen"><summary>替补（' + x.others.length + '）</summary>' + x.others.map(r => sop(r.op, r.y, r.core ? " core" : "")).join("") + '</details>' : ""))).join("");
+  return '<h4>叠层</h4><div class="fx stkbox">' +
+    line('<b>重点盟约</b>', focus.length ? focus.map(x => '<button class="chip core on" data-bond="' + esc(x) + '">' + bondIcon(x) + esc(x) + '</button>').join(" ") : none) +
+    line('<b>叠层核心</b>', s.cores.size ? [...s.cores].map(([n, c]) => sop(n, "叠" + c.bonds.join("、") + " · " + c.y + " · " + buildNames(b).get(n), " core")).join("") : none) +
+    rows +
+    (s.helpers.length ? line('<b>通用辅助</b>', s.helpers.map(r => sop(r.op, (r.y ? r.y + " · " : "") + r.stage)).join("")) : "") +
+    (s.amps.length ? line('<b>叠层放大</b>', s.amps.map(r => sop(r.op, r.stage)).join("")) : "") + '</div>';
+}
+const buildViews = new Map();   // 每套阵容上次看到哪个页签、哪个阶段
+function showBuild(id, keep){   // keep：true = 原地重画；"tab" = 切页签 / 阶段，最多滚回到页签那一行；不传 = 从头看
+  const b = BUILDS.find(x => x.id === id); if(!b) return;
+  const sh = $("sheet"), was = sh.scrollTop;
+  setView("build:" + id, () => showBuild(id, true));
+  if(!sheetStack.some(v => v.key === "builds")) sheetStack.unshift({key: "builds", fn: () => showBuilds("guide"), scroll: 0});   // 「‹」永远能回到阵容列表
+  curBuild = id;
+  const v = buildViews.get(id) || {tab: "over", stage: 0}; buildViews.set(id, v);
+  const li = a => (a && a.length) ? '<ul class="bl">' + a.map(t => '<li>' + esc(t) + '</li>').join("") + '</ul>' : "";
+  const gone = n => OPS.has(n) && isOut(OPS.get(n));
+  // 各阶段和可选组排成一排；名字重复的自动编号（前期 1 / 前期 2）
+  const items = b.stages.map((st, i) => ({st, i})).concat((b.extras || []).map(st => ({st, i: -1})));
+  const total = {}, nth = {};
+  items.forEach(it => { const k = it.st.short || it.st.label; total[k] = (total[k] || 0) + 1; });
+  items.forEach(it => { const k = it.st.short || it.st.label; nth[k] = (nth[k] || 0) + 1; it.name = total[k] > 1 ? k + " " + nth[k] : k; });
+  if(v.stage >= items.length) v.stage = 0;
+  if(v.tab === "stack" && !window.SWEEP_INDEX) v.tab = "over";
+  const stageCard = it => { const st = it.st, miss = (st.ops || []).filter(gone).length;
+    return '<div class="bst"><h4><b>' + esc(st.label) + '</b>' + (st.when ? '　' + esc(st.when) : "") + (st.comp ? '　<span class="tagp ok">' + esc(st.comp) + '</span>' : "") +
+      (miss ? '<span class="tagp badp">缺 ' + miss + ' 人</span>' : "") + '</h4>' +
+      ((st.ops || []).length ? buildOps(st.ops) : "") +
+      ((st.bench || []).length ? '<div class="note" style="margin-top:6px">整备区：</div>' + buildOps(st.bench) : "") +
+      ((st.equip || []).length ? '<div class="note" style="margin-top:4px">装备：' + st.equip.map(e => (e.op ? esc(e.op) + " ← " : "") + esc(e.items.join(" + "))).join("；") + '</div>' : "") +
+      li(st.notes) +
+      (it.i >= 0 && (st.ops || []).some(n => OPS.has(n) && !gone(n)) ? '<button class="lnk" data-buildfill="' + it.i + '">放进阵容区</button>' : "") + '</div>'; };
+  let body;
+  if(v.tab === "stages"){
+    body = '<div class="chips stgchips">' + items.map((it, k) => '<button class="chip core' + (k === v.stage ? " on" : "") + '" data-bvstage="' + k + '">' + esc(it.name) + '</button>').join("") + '</div>' +
+      stageCard(items[v.stage]) +
+      '<div class="stgnav">' + (v.stage > 0 ? '<button class="lnk" data-bvstage="' + (v.stage - 1) + '">‹ ' + esc(items[v.stage - 1].name) + '</button>' : '<span></span>') +
+      (v.stage < items.length - 1 ? '<button class="lnk" data-bvstage="' + (v.stage + 1) + '">' + esc(items[v.stage + 1].name) + ' ›</button>' : "") + '</div>';
+  } else if(v.tab === "stack"){
+    body = buildStackHtml(b);
+  } else {
+    const last = b.noFinal ? null : [...b.stages].reverse().find(st => (st.ops || []).length);
+    const cores = window.SWEEP_INDEX ? buildStack(b).cores : new Map(), names = buildNames(b);
+    body = (b.summary ? '<div class="fx">' + esc(b.summary) + '</div>' : "") +
+      (last ? '<h4>成型</h4>' + stageCard({st: last, i: b.stages.indexOf(last)}) : "") +
+      (cores.size ? '<h4>叠层核心</h4><div class="fx stkbox" style="padding:10px 12px 5px">' + [...cores].map(([n, c]) => sop(n, "叠" + c.bonds.join("、") + " · " + c.y + " · " + names.get(n), " core")).join("") + '</div>' : "") +
+      ((b.strategies || []).length ? '<h4>策略</h4><div class="fx metab">' + b.strategies.map(x => '<div><b>' + esc(x.name) + '</b>' + (x.note ? '<span class="note">　' + esc(x.note) + '</span>' : "") + '</div>').join("") + '</div>' : "") +
+      ((b.shop || []).length ? '<h4>升本节奏</h4><div class="fx">' + li(b.shop) + '</div>' : "") +
+      ((b.notes || []).length ? '<h4>其他</h4><div class="fx">' + li(b.notes) + '</div>' : "") +
+      (b.pinned ? '<h4>补充</h4><div class="fx">' + esc(b.pinned) + '</div>' : "");
+  }
+  const tabList = [["over", "速览"], ["stages", "各阶段 " + items.length]].concat(window.SWEEP_INDEX ? [["stack", "叠层"]] : []);
+  const srcUrl = "https://www.bilibili.com/video/" + esc(b.source.bvid);   // 原视频单独给一个按钮（UP 主提的），顶上和底下各一个
+  openSheet('<div class="head"><div><h2>' + esc(b.name) + '</h2><div class="meta">' + srcLine(b) + '</div>' +
+    '<a class="btn primary srcbtn" target="_blank" rel="noopener" href="' + srcUrl + '">▶ 看原视频</a>' +
+    '<div class="tags2" style="margin-top:6px">' + (b.bonds || []).map(x => '<button class="chip core' + (banned.has(x) ? " ban" : "") + '" data-bond="' + esc(x) + '">' + bondIcon(x) + esc(x) + '</button>').join("") + '</div></div>' +
+    '<button class="x" data-close="1" aria-label="关闭">✕</button></div>' +
+    buildBanHtml(b) +
+    '<div class="tabs bvtabs">' + tabList.map(t => '<button data-bvtab="' + t[0] + '" class="' + (v.tab === t[0] ? "on" : "") + '">' + t[1] + '</button>').join("") + '</div>' +
+    body +
+    '<div class="acts">' + (activeBuild === b.id ? '<button class="btn" data-buildoff="1">取消对照</button>' : '<button class="btn primary" data-buildon="' + esc(b.id) + '">在干员池里对照这套</button>') +
+      '<a class="btn" target="_blank" rel="noopener" href="' + srcUrl + '">▶ 看原视频</a></div>', true);
+  const tb = sh.querySelector(".bvtabs"), tabTop = tb ? tb.getBoundingClientRect().top - sh.getBoundingClientRect().top - 2 : 0;
+  sh.scrollTop = keep === true ? was : keep === "tab" ? Math.min(was, Math.max(0, tabTop)) : 0;
+  const row = sh.querySelector(".stgchips"), on = row && row.querySelector(".on");   // 手机上阶段那一排能横滑：把当前阶段滑到中间
+  if(on) row.scrollLeft += on.getBoundingClientRect().left - row.getBoundingClientRect().left - (row.clientWidth - on.offsetWidth) / 2;
+}
+
+/* ---------- 自选编队 ---------- */
+function extCardBonds(o){ return o.bonds.map(b => '<b>' + bondIcon(b) + esc(b) + '</b>').join(""); }
+const EXTRECS = (EXTDATA.recs && EXTDATA.recs.tips) || [], EXTREC = new Map(EXTRECS.map(r => [r.name, r]));
+const extWho = src => src.map(s => '<a target="_blank" rel="noopener" href="https://www.bilibili.com/video/' + esc(s.bvid) + '">' + esc(s.author) + '</a>').join("、");
+const extSk = r => [].concat(r.skill || []);
+const extRecTags = r => (r.tier ? '<span class="xg">放 ' + ROMAN[r.tier] + ' 阶</span>' : "") + (extSk(r).length ? '<span class="xg">' + extSk(r).join(" / ") + ' 技能</span>' : "");
+const extSkLine = r => { const o = EXTS.get(r.name), ks = extSk(r); if(!ks.length) return "";
+  return '<div class="xw">推荐 ' + ks.map(k => k + ' 技能「' + esc((o.skills[k - 1] || {}).name || "") + '」').join(" 或 ") + (r.skillNote ? '；' + esc(r.skillNote) : "") + '</div>'; };
+function extRecs(){
+  if(!EXTRECS.length) return "";
+  const main = EXTRECS.filter(r => r.text && EXTS.has(r.name)), rest = EXTRECS.filter(r => !r.text && EXTS.has(r.name));
+  const row = r => { const o = EXTS.get(r.name), t = extTier(r.name), to = r.tier || 5;
+    return '<div class="xrec"><div class="av" data-info="' + esc(r.name) + '">' + (o.avatar ? '<img src="' + esc(o.avatar) + '" alt="" loading="lazy">' : "") + '</div>' +
+      '<div class="xb"><div class="xn">' + esc(r.name) + ' <span class="xg">' + o.bonds.map(b => bondIcon(b) + esc(b)).join(" ") + '</span>' + extRecTags(r) + '</div>' +
+      '<div class="xt">' + esc(r.text) + '</div><div class="xw">' + r.src.length + ' 人推荐：' + extWho(r.src) + '</div></div>' +
+      (t ? '<span class="xin">已放 ' + ROMAN[t] + ' 阶</span>' : '<button class="btn" data-extaddto="' + to + '" data-name="' + esc(r.name) + '">放进 ' + ROMAN[to] + ' 阶</button>') + '</div>'; };
+  const rules = (EXTDATA.recs.rules || []).map(x => '<li>' + esc(x.text) + '</li>').join("");
+  return '<h4>推荐放谁</h4><div class="fx xrecs">' + main.map(row).join("") +
+    (rest.length ? '<div class="xw note">也有人放：' + rest.map(r => '<button class="lnk" data-info="' + esc(r.name) + '">' + esc(r.name) + '</button>').join("、") + '</div>' : "") + '</div>' +
+    (rules ? '<h4>要点</h4><div class="fx"><ul class="xtips">' + rules + '</ul></div>' : "");
+}
+function opExtRec(name){
+  const r = EXTREC.get(name); if(!r) return "";
+  return '<h4>推荐</h4><div class="fx xrecs"><div class="xrec"><div class="xb">' + (r.text ? '<div>' + esc(r.text) + extRecTags(r) + '</div>' : extRecTags(r)) + extSkLine(r) +
+    '<div class="xw">' + r.src.length + ' 人推荐：' + extWho(r.src) + '</div></div></div></div>';
+}
+function showExtPanel(){
+  const keep = sameView("ext") ? $("sheet").scrollTop : 0;
+  setView("ext", showExtPanel);
+  const row = t => {
+    const on = ext.on.filter(n => extTier(n) === t).length;
+    const cards = ext[t].map(n => { const o = EXTS.get(n), isOn = ext.on.includes(n), ban = extBanned(o);
+      return '<div class="xslot' + (ban ? " ban" : isOn ? " on" : "") + '" style="--tc:var(--t' + t + ')">' +
+        '<button class="xdel" data-extdel="' + esc(n) + '" aria-label="移出自选编队">✕</button>' +
+        '<div class="xmain" data-extfield="' + esc(n) + '"><div class="av">' + (o.avatar ? '<img src="' + esc(o.avatar) + '" alt="" loading="lazy">' : esc(n[0])) + '</div>' +
+        '<div class="nm">' + esc(n) + '</div><div class="tags">' + extCardBonds(o) + '</div>' +
+        '<div class="xst">' + (ban ? "本局禁用" : isOn ? "本局上场 ✓" : "点击上场") + '</div></div>' +
+        '<button class="lnk" data-info="' + esc(n) + '">技能</button></div>'; }).join("");
+    const add = ext[t].length < EXT_SLOTS ? '<button class="xslot add" data-extpick="' + t + '"><span>＋</span>添加</button>' : "";
+    return '<h4>' + ROMAN[t] + ' 阶自选位　已放 ' + ext[t].length + ' / ' + EXT_SLOTS + '　本局上场 ' + on + ' / ' + EXT_PER_GAME + '</h4><div class="xrow">' + cards + add + '</div>';
+  };
+  openSheet('<div class="head"><div><h2>自选编队（外援）</h2><div class="meta">先放进自选位，再点选本局上场的</div></div>' +
+    '<button class="x" data-close="1" aria-label="关闭">✕</button></div>' + row(5) + row(6) +
+    '<div class="fx" style="margin-top:12px"><span class="note">只能放名单外的 6 星；Ⅴ、Ⅵ 阶各 ' + EXT_SLOTS + ' 格，每局每阶最多上 ' + EXT_PER_GAME + ' 个。外援没有特质，盟约按所属势力，没有对应盟约的算【' + esc(EXTDATA.rules.fallbackBond || "协防干员") + '】。</span></div>' + extRecs() +
+    '<div class="acts"><button class="btn primary" data-close="1">完成</button></div>');
+  $("sheet").scrollTop = keep;
+}
+let extPick = {tier: 5, q: "", bond: null};
+function extPickList(){
+  const used = new Set([...ext[5], ...ext[6]]);
+  const rank = n => { const i = EXTRECS.findIndex(r => r.name === n && r.text); return i < 0 ? 999 : i; };
+  const list = EXTDATA.operators.filter(o => !used.has(o.name) && (!extPick.q || o.name.includes(extPick.q)) && (!extPick.bond || o.bonds.includes(extPick.bond)))
+    .map((o, i) => [o, i]).sort((a, b) => rank(a[0].name) - rank(b[0].name) || a[1] - b[1]).map(x => x[0]);
+  return list.length ? list.map(o => '<div class="op ext" style="--tc:var(--t' + extPick.tier + ')" data-extadd="' + esc(o.name) + '" title="' + esc(o.name) + '">' + (rank(o.name) < 999 ? '<span class="rk">荐</span>' : "") +
+      '<div class="av">' + (o.avatar ? '<img src="' + esc(o.avatar) + '" alt="" loading="lazy" draggable="false">' : esc(o.name[0])) + '</div><div class="nm">' + esc(o.name) + '</div>' +
+      '<div class="tags">' + extCardBonds(o) + '<b>' + esc(o.prof) + '</b></div>' +
+      '<button class="info" data-info="' + esc(o.name) + '" aria-label="查看技能">i</button></div>').join("")
+    : '<p style="color:var(--dim);grid-column:1/-1;text-align:center;padding:20px 0">没有符合条件的干员</p>';
+}
+function showExtPick(tier){
+  extPick = {tier: tier, q: "", bond: null};
+  setView("extpick", () => showExtPick(tier));
+  const bs = [...new Set(EXTDATA.operators.flatMap(o => o.bonds))];
+  openSheet('<div class="head"><div><h2>选一个放进 ' + ROMAN[tier] + ' 阶自选位</h2><div class="meta">共 ' + EXTDATA.operators.length + ' 名可选的 6 星干员，点头像加入</div></div>' +
+    '<button class="x" data-close="1" aria-label="关闭">✕</button></div>' +
+    '<input id="extQ" type="search" placeholder="搜索干员名" autocomplete="off" class="xq">' +
+    '<div class="chips banchips" id="extBonds" style="margin:8px 0"><button class="chip core on" data-extbond="">全部</button>' +
+    bs.map(b => '<button class="chip core" data-extbond="' + esc(b) + '">' + bondIcon(b) + esc(b) + '</button>').join("") + '</div>' +
+    '<div class="grid" id="extList">' + extPickList() + '</div>');
+}
+function showExtOp(name){
+  const o = EXTS.get(name); if(!o) return;
+  setView("xop:" + name, () => showExtOp(name));
+  const t = extTier(name);
+  const rk = new Set(extSk(EXTREC.get(name) || {}));
+  const sk = o.skills.map(k => '<h4>' + k.n + ' 技能　' + esc(k.name || "") + (rk.has(k.n) ? ' <span class="xg">推荐</span>' : "") + (k.sp != null ? '　<span class="note">技力 ' + k.sp + (k.init ? "（初始 " + k.init + "）" : "") + (k.dur > 0 ? "，持续 " + k.dur + " 秒" : "") + '</span>' : "") +
+    '</h4><div class="fx">' + esc(k.desc || "（无描述）") + '</div>').join("");
+  openSheet('<div class="head" style="--tc:var(--t6)"><div class="av">' + (o.avatar ? '<img src="' + esc(o.avatar) + '" alt="">' : "") + '</div>' +
+    '<div><h2>' + esc(o.name) + '</h2><div class="meta">6 星 · ' + esc(o.prof) + ' · 外援' + (t ? "（已放在 " + ROMAN[t] + " 阶自选位）" : "") + '</div>' +
+    '<div class="chips" style="margin-top:6px;flex-wrap:wrap">' + o.bonds.map(b => '<button class="chip core" data-bond="' + esc(b) + '">' + bondIcon(b) + esc(b) + ' ›</button>').join("") + '</div></div>' +
+    '<button class="x" data-close="1" aria-label="关闭">✕</button></div>' +
+    '<div class="fx metab"><div class="note">外援没有特质。技能为 7 级数值。</div></div>' + opExtRec(name) + opEquip(name) + sk +
+    '<div class="acts">' + (t ? '<button class="btn" data-extdel="' + esc(name) + '">移出自选编队</button>'
+      : '<button class="btn primary" data-extaddto="5" data-name="' + esc(name) + '">放进 Ⅴ 阶</button><button class="btn primary" data-extaddto="6" data-name="' + esc(name) + '">放进 Ⅵ 阶</button>') + '</div>');
+}
+function extAdd(name, tier){
+  if(!EXTS.has(name) || extTier(name) || ext[tier].length >= EXT_SLOTS) return false;
+  ext[tier].push(name); saveExt(); render(); return true;
+}
+function extDel(name){
+  for(const t of [5, 6]) ext[t] = ext[t].filter(n => n !== name);
+  ext.on = ext.on.filter(n => n !== name); saveExt(); render();
+}
+function extToggleField(name){
+  const t = extTier(name); if(!t) return;
+  if(ext.on.includes(name)) ext.on = ext.on.filter(n => n !== name);
+  else {
+    if(extBanned(EXTS.get(name))) return alert("这个干员的核心盟约本局被禁了，上不了场。");
+    if(ext.on.filter(n => extTier(n) === t).length >= EXT_PER_GAME) return alert(ROMAN[t] + " 阶每局最多上 " + EXT_PER_GAME + " 个，先取消一个。");
+    ext.on.push(name);
+  }
+  saveExt(); render();
+}
+
+/* ---------- 截图识别本局禁用 ----------
+   游戏开局那一屏：亮绿色圆 = 可用，暗灰色圆 = 被禁，每个盟约的图标形状不同。
+   先找绿色圆，量出大小和间距 → 推出整张网格 → 每格判断亮 / 暗 / 空 → 把格子里的图标形状和 26 个盟约图标逐个比。
+   全在浏览器里算，图片不上传。原型和调参记录在 tools/ban_detect_proto.py。 */
+const SHOT_N = 28;
+function shotNorm(mask, w, h){   // 二值形状裁到外接框，等比缩放后居中放进 N×N
+  let x0 = w, y0 = h, x1 = -1, y1 = -1, cnt = 0;
+  for(let y = 0; y < h; y++) for(let x = 0; x < w; x++) if(mask[y * w + x]){ cnt++; if(x < x0) x0 = x; if(x > x1) x1 = x; if(y < y0) y0 = y; if(y > y1) y1 = y; }
+  if(cnt < 12) return null;
+  const cw = x1 - x0 + 1, ch = y1 - y0 + 1, k = (SHOT_N - 2) / Math.max(cw, ch);
+  const nw = Math.max(1, Math.round(cw * k)), nh = Math.max(1, Math.round(ch * k));
+  const out = new Uint8Array(SHOT_N * SHOT_N), ox = (SHOT_N - nw) >> 1, oy = (SHOT_N - nh) >> 1;
+  for(let ty = 0; ty < nh; ty++) for(let tx = 0; tx < nw; tx++){
+    const ax = Math.floor(x0 + tx / k), bx = Math.max(ax + 1, Math.ceil(x0 + (tx + 1) / k));
+    const ay = Math.floor(y0 + ty / k), by = Math.max(ay + 1, Math.ceil(y0 + (ty + 1) / k));
+    let sum = 0, c = 0;
+    for(let sy = ay; sy < by && sy <= y1; sy++) for(let sx = ax; sx < bx && sx <= x1; sx++){ sum += mask[sy * w + sx]; c++; }
+    if(c && sum / c > 0.5) out[(oy + ty) * SHOT_N + ox + tx] = 1;
+  }
+  return out;
+}
+let shotRefs = null, shotNote = null;
+let shotFail = null;   // 刚才没认出的那张：{file, info, state: "" | "sending" | "sent" | "error"}，用户点了才发
+function shotLoadRefs(){   // 26 个盟约图标各自的形状，用到时才算一次
+  if(!shotRefs) shotRefs = Promise.all(DATA.bonds.filter(b => b.icon).map(b => new Promise(res => {
+    const im = new Image();
+    im.onload = () => { const c = document.createElement("canvas"); c.width = im.naturalWidth; c.height = im.naturalHeight;
+      const g = c.getContext("2d"); g.drawImage(im, 0, 0);
+      const d = g.getImageData(0, 0, c.width, c.height).data, m = new Uint8Array(c.width * c.height);
+      for(let i = 0; i < m.length; i++) m[i] = d[i * 4 + 3] > 128 ? 1 : 0;
+      res([b.name, shotNorm(m, c.width, c.height)]); };
+    im.onerror = () => res([b.name, null]);
+    im.src = b.icon;
+  }))).then(a => new Map(a.filter(x => x[1])));
+  return shotRefs;
+}
+/* 手机对着电脑屏幕拍的照片：画面歪斜（透视）、偏色、发灰，绿圈连不成横平竖直的网格。
+   先在照片里找绿圈 → 量出行的走向、把绿圈分成行、按间距排好列号 → 用「第几列、第几行」和绿圈位置算出透视变换
+   → 把图标那几行重新画成一张横平竖直、像截图一样的图，再交给下面的 shotDetect。flip = 整张转 180° 再试（照片横着拍的时候用）。 */
+function shotRectify(img, flip){
+  const iw = img.naturalWidth || img.width, ih = img.naturalHeight || img.height;
+  const sc = Math.min(1, 1400 / Math.max(iw, ih)), W = Math.round(iw * sc), H = Math.round(ih * sc), n = W * H;
+  const cv = document.createElement("canvas"); cv.width = W; cv.height = H;
+  const g = cv.getContext("2d", {willReadFrequently: true}); g.imageSmoothingQuality = "high"; g.drawImage(img, 0, 0, W, H);
+  const px = g.getImageData(0, 0, W, H).data;
+  // 三个颜色通道各自拉满（去掉偏色和发灰）
+  for(let ch = 0; ch < 3; ch++){ const hist = new Uint32Array(256); for(let i = 0; i < n; i++) hist[px[i * 4 + ch]]++;
+    let lo = 0, hi = 255, acc = 0; for(let v = 0; v < 256; v++){ acc += hist[v]; if(acc > n * 0.01){ lo = v; break; } }
+    acc = 0; for(let v = 255; v >= 0; v--){ acc += hist[v]; if(acc > n * 0.002){ hi = v; break; } }
+    const k = 255 / Math.max(40, hi - lo); for(let i = 0; i < n; i++){ const q = i * 4 + ch; px[q] = Math.max(0, Math.min(255, (px[q] - lo) * k)); } }
+  const green = new Uint8Array(n);
+  for(let i = 0; i < n; i++){ const r = px[i * 4], gg = px[i * 4 + 1], b = px[i * 4 + 2]; green[i] = (gg > 90 && gg - r > 45 && b - r > 15) ? 1 : 0; }
+  const seen = new Uint8Array(n), blobs = [], stack = [];
+  for(let i = 0; i < n; i++){ if(!green[i] || seen[i]) continue;
+    let x0 = W, y0 = H, x1 = 0, y1 = 0, area = 0, sx = 0, sy = 0; seen[i] = 1; stack.push(i);
+    while(stack.length){ const q = stack.pop(), x = q % W, y = (q / W) | 0; area++; sx += x; sy += y;
+      if(x < x0) x0 = x; if(x > x1) x1 = x; if(y < y0) y0 = y; if(y > y1) y1 = y;
+      for(let dy = -1; dy <= 1; dy++) for(let dx = -1; dx <= 1; dx++){ const xx = x + dx, yy = y + dy;
+        if(xx < 0 || yy < 0 || xx >= W || yy >= H) continue; const t = yy * W + xx; if(green[t] && !seen[t]){ seen[t] = 1; stack.push(t); } } }
+    const w = x1 - x0 + 1, h = y1 - y0 + 1;
+    if(w >= 8 && h >= 8 && w / h > 0.6 && w / h < 1.67 && area > 0.35 * w * h) blobs.push({x: sx / area, y: sy / area, w: (w + h) / 2}); }
+  if(blobs.length < 8) return null;
+  const med = a => { const t = a.slice().sort((p, q) => p - q); return t[t.length >> 1]; };
+  const ws = blobs.map(b => b.w).sort((p, q) => p - q), p90 = ws[Math.min(ws.length - 1, Math.floor(ws.length * 0.9))];
+  const D = med(ws.filter(w => w >= 0.6 * p90)), bs = blobs.filter(b => b.w > 0.7 * D && b.w < 1.45 * D);
+  if(bs.length < 8) return null;
+  // 行的走向：每个绿圈到最近邻居的方向，取最多的那个角度
+  const angs = [];
+  for(const a of bs){ let best = null, bd = 1e9;
+    for(const b of bs){ if(a === b) continue; const d = Math.hypot(b.x - a.x, b.y - a.y); if(d > 0.9 * D && d < 2.4 * D && d < bd){ bd = d; best = b; } }
+    if(best){ let t = Math.atan2(best.y - a.y, best.x - a.x); if(t <= -Math.PI / 2) t += Math.PI; if(t > Math.PI / 2) t -= Math.PI; angs.push(t); } }
+  if(angs.length < 5) return null;
+  const bins = new Array(36).fill(0); for(const t of angs) bins[Math.min(35, Math.floor((t + Math.PI / 2) / Math.PI * 36))]++;
+  const pk = bins.indexOf(Math.max(...bins)), near = angs.filter(t => Math.abs(Math.floor((t + Math.PI / 2) / Math.PI * 36) - pk) <= 1);
+  let th = med(near) + (flip ? Math.PI : 0);
+  const cs = Math.cos(th), sn = Math.sin(th);
+  const pts = bs.map(b => ({u: b.x, v: b.y, x: b.x * cs + b.y * sn, y: -b.x * sn + b.y * cs})).sort((p, q) => p.x - q.x);
+  // 分行：按走向从左往右串，和某一行最后一个点的高度差不到 0.6 个圈就接上
+  let rows = [];
+  for(const p of pts){ let best = null, bd = 0.6 * D;
+    for(const r of rows){ const d = Math.abs(p.y - r[r.length - 1].y); if(d < bd){ bd = d; best = r; } }
+    if(best) best.push(p); else rows.push([p]); }
+  rows = rows.sort((p, q) => med(p.map(t => t.y)) - med(q.map(t => t.y)));
+  // 只有一个绿圈的行（比如附加第二行只剩一个没禁）也留着，它能帮着定透视；但离有两个以上绿圈的行太远的单点多半是别处的绿色，扔掉
+  const multi = rows.filter(r => r.length >= 2); if(multi.length < 1) return null;
+  const yOf = r => med(r.map(t => t.y)), ylo = yOf(multi[0]) - 4 * D, yhi = yOf(multi[multi.length - 1]) + 4 * D;
+  rows = rows.filter(r => r.length >= 2 || (yOf(r) > ylo && yOf(r) < yhi));
+  if(rows.length < 2 || multi.length < 1) return null;
+  // 列号：行内相邻绿圈的间距按「一格」取整（被禁的格子没有绿圈，间距就是两格、三格……）
+  const gaps = []; for(const r of rows) for(let i = 1; i < r.length; i++) gaps.push(Math.hypot(r[i].u - r[i - 1].u, r[i].v - r[i - 1].v));
+  gaps.sort((p, q) => p - q); const base = gaps[Math.floor(gaps.length * 0.2)], S0 = med(gaps.filter(d => d > 0.75 * base && d < 1.3 * base));
+  for(const r of rows){ let c = 0, sl = S0; r[0].c = 0;
+    for(let i = 1; i < r.length; i++){ const d = Math.hypot(r[i].u - r[i - 1].u, r[i].v - r[i - 1].v), k = Math.max(1, Math.round(d / sl)); c += k; r[i].c = c; if(k === 1) sl = 0.5 * sl + 0.5 * d; } }
+  // 各行的列号对齐到同一套：拿绿圈最多的一行当基准，别的行挪几格最贴合就挪几格
+  const ref = rows.reduce((p, q) => q.length > p.length ? q : p), fitX = c => { // 基准行：列号 → 位置（二次拟合，透视下间距会渐变）
+    const m = ref.length >= 4 ? 3 : 2, A = [], B = [];
+    for(let i = 0; i < m; i++){ A.push(new Array(m).fill(0)); B.push(0); }
+    for(const p of ref) for(let i = 0; i < m; i++){ for(let j = 0; j < m; j++) A[i][j] += Math.pow(p.c, i + j); B[i] += p.x * Math.pow(p.c, i); }
+    const co = shotSolve(A, B); return co ? co.reduce((s, k, i) => s + k * Math.pow(c, i), 0) : ref[0].x + c * S0; };
+  for(const r of rows){ if(r === ref) continue; let bestS = 0, bestE = 1e18;
+    for(let s = -12; s <= 12; s++){ let e = 0; for(const p of r) e += Math.abs(p.x - fitX(p.c + s)); if(e < bestE){ bestE = e; bestS = s; } }
+    for(const p of r) p.c += bestS; }
+  const cmin = Math.min(...rows.flatMap(r => r.map(p => p.c)));
+  for(const r of rows) for(const p of r) p.c -= cmin;
+  // 一行最多 10 个：超出第 10 列的是别处的绿色（比如右边领袖头像），不要
+  rows = rows.map(r => r.filter(p => p.c <= 9)).filter(r => r.length);
+  const cmax = Math.max(...rows.flatMap(r => r.map(p => p.c)));
+  // 行高：这一页的版式是固定的（按 1920×1080、1428×879、手机 2772×1280 三种截图量的，以列距为 1）：
+  //   核心盟约一行 → 附加第一行 2.44，附加第一行 → 第二行 1.68。看相邻两行隔了多远，认出它们各是哪一行
+  const LAY = [0, 2.44, 4.12], ry = rows.map(r => med(r.map(t => t.y)));
+  let best = null;
+  for(let s0 = 0; s0 < 3; s0++){ let idx = [s0], e = 0, ok = true;
+    for(let k = 1; k < rows.length; k++){ const gap = (ry[k] - ry[k - 1]) / S0, last = idx[idx.length - 1]; let bj = -1, be = 0.7;
+      for(let j = last + 1; j < 3; j++){ const d = Math.abs(LAY[j] - LAY[last] - gap); if(d < be){ be = d; bj = j; } }
+      if(bj < 0){ ok = false; break; } idx.push(bj); e += be; }
+    if(ok && (!best || e < best.e)) best = {idx, e}; }
+  if(!best) return null;
+  let Ys = best.idx.map(j => LAY[j]);
+  // 离拟合结果太远的点（认错列、别处的绿色）去掉再算一遍
+  for(let it = 0; it < 2; it++){ const H0 = shotHomog(rows, Ys); if(!H0) break; const h = H0.h; let drop = 0;
+    rows = rows.map((r, k) => r.filter(p => { const z = h[6] * p.c + h[7] * Ys[k] + 1, du = (h[0] * p.c + h[1] * Ys[k] + h[2]) / z - p.u, dv = (h[3] * p.c + h[4] * Ys[k] + h[5]) / z - p.v;
+      const bad = Math.hypot(du, dv) > 0.35 * S0; if(bad) drop++; return !bad; }));
+    const keep = rows.map(r => r.length > 0); Ys = Ys.filter((_, k) => keep[k]); rows = rows.filter(r => r.length);
+    if(!drop || rows.length < 2) break; }
+  if(rows.length < 2) return null;
+  const src = {px, W, H, f: 1, raw: false};   // 从找网格用的那张（缩到 1400）取：试过从更清晰的原图取，摩尔纹和噪点反而让认图变差
+  let Hm = shotHomog(rows, Ys), out = null;
+  if(window.__shotDbg) window.__shotDbg.last = {S0, D, th, Ys: Ys.slice(), err: Hm && Hm.err, rows: rows.map(r => r.map(p => [p.c, Math.round(p.u), Math.round(p.v)]))};
+  for(let pass = 0; pass < 3; pass++){
+    if(!Hm || Hm.err > 0.25 * S0 * S0) return null;
+    out = shotRender(src, Hm.h, cmax, Ys);
+    const asp = shotAspect(out); if(!asp || Math.abs(asp - 1) < 0.04) break;
+    for(let k = 0; k < Ys.length; k++) Ys[k] /= asp;
+    Hm = shotHomog(rows, Ys);
+  }
+  // 网格：列 0..9，行按算出来的行高；只认出两行时补上整行被禁的那一行（核心 → 附加第一行 ≈ 2.44 格，附加两行之间 ≈ 1.68 格，按截图量的）
+  const gy = Ys.slice(); if(gy.length === 2) gy[1] - gy[0] > 2.0 ? gy.push(gy[1] + 1.68) : gy.unshift(gy[0] - 2.44);
+  if(out) out.grid = {D: 0.71 * 130, S: 130, cols: Array.from({length: 10}, (_, c) => (c + 1.6) * 130), ys: gy.map(y => (y + 0.9) * 130).filter(y => y > 0 && y < out.height)};
+  return out;
+}
+function shotRender(src, h, cmax, Ys){   // 画成横平竖直的图：一格 130 像素，左右各留一点，下面多留一行（整行都被禁时那行没有绿圈）
+  const U = 130, X0 = -1.6, X1 = Math.max(cmax, 9) + 0.8, Y0 = -0.9, Y1 = Ys[Ys.length - 1] + 2.8;
+  const OW = Math.round((X1 - X0) * U), OH = Math.min(4000, Math.round((Y1 - Y0) * U)), out = document.createElement("canvas"); out.width = OW; out.height = OH;
+  const og = out.getContext("2d", {willReadFrequently: true}), od = og.createImageData(OW, OH), o = od.data, {px, W, H, f} = src;
+  for(let oy = 0; oy < OH; oy++){ const Y = Y0 + oy / U;
+    for(let ox = 0; ox < OW; ox++){ const X = X0 + ox / U, z = h[6] * X + h[7] * Y + 1, u = (h[0] * X + h[1] * Y + h[2]) / z, v = (h[3] * X + h[4] * Y + h[5]) / z, q = (oy * OW + ox) * 4;
+      o[q + 3] = 255; const uu = u * f, vv = v * f; if(uu < 0 || vv < 0 || uu >= W - 1 || vv >= H - 1) continue;
+      const x0 = uu | 0, y0 = vv | 0, fx = uu - x0, fy = vv - y0, a = (y0 * W + x0) * 4, b = a + 4, c = a + W * 4, d = c + 4;
+      for(let ch = 0; ch < 3; ch++){ let val = (px[a + ch] * (1 - fx) + px[b + ch] * fx) * (1 - fy) + (px[c + ch] * (1 - fx) + px[d + ch] * fx) * fy; o[q + ch] = val; } } }
+  og.putImageData(od, 0, 0);
+  return out;
+}
+function shotAspect(cv){   // 摆正后的图里，大绿圈「高 ÷ 宽」的中位数（应该是 1）
+  const W = cv.width, H = cv.height, n = W * H, px = cv.getContext("2d", {willReadFrequently: true}).getImageData(0, 0, W, H).data;
+  const green = new Uint8Array(n), seen = new Uint8Array(n), rs = [], stack = [];
+  for(let i = 0; i < n; i++){ const r = px[i * 4], g = px[i * 4 + 1], b = px[i * 4 + 2]; green[i] = (g > 90 && g - r > 45 && b - r > 15) ? 1 : 0; }
+  for(let i = 0; i < n; i++){ if(!green[i] || seen[i]) continue;
+    let x0 = W, y0 = H, x1 = 0, y1 = 0, area = 0; seen[i] = 1; stack.push(i);
+    while(stack.length){ const q = stack.pop(), x = q % W, y = (q / W) | 0; area++;
+      if(x < x0) x0 = x; if(x > x1) x1 = x; if(y < y0) y0 = y; if(y > y1) y1 = y;
+      for(const t of [q - 1, q + 1, q - W, q + W]) if(t >= 0 && t < n && green[t] && !seen[t] && Math.abs((t % W) - x) <= 1){ seen[t] = 1; stack.push(t); } }
+    const w = x1 - x0 + 1, h = y1 - y0 + 1;
+    if(w > 40 && w < 120 && h > 20 && area > 0.4 * w * h) rs.push(h / w); }
+  if(rs.length < 4) return null;
+  rs.sort((p, q) => p - q); return rs[rs.length >> 1];
+}
+function shotSolve(A, B){   // 小线性方程组（高斯消元，选主元）
+  const m = B.length, M = A.map((r, i) => r.concat([B[i]]));
+  for(let i = 0; i < m; i++){ let p = i; for(let r = i + 1; r < m; r++) if(Math.abs(M[r][i]) > Math.abs(M[p][i])) p = r;
+    if(Math.abs(M[p][i]) < 1e-12) return null; [M[i], M[p]] = [M[p], M[i]];
+    for(let r = 0; r < m; r++){ if(r === i) continue; const f = M[r][i] / M[i][i]; for(let c = i; c <= m; c++) M[r][c] -= f * M[i][c]; } }
+  return M.map((r, i) => r[m] / r[i]);
+}
+function shotHomog(rows, Ys){   // 透视变换：(列号, 行高) → 照片里的位置；最小二乘，返回 8 个参数和平均误差（像素²）
+  const A = [], B = [];
+  for(let i = 0; i < 8; i++){ A.push(new Array(8).fill(0)); B.push(0); }
+  const add = (row, rhs) => { for(let i = 0; i < 8; i++){ for(let j = 0; j < 8; j++) A[i][j] += row[i] * row[j]; B[i] += row[i] * rhs; } };
+  let n = 0;
+  rows.forEach((r, k) => { const Y = Ys[k]; for(const p of r){ const X = p.c; n++;
+    add([X, Y, 1, 0, 0, 0, -X * p.u, -Y * p.u], p.u); add([0, 0, 0, X, Y, 1, -X * p.v, -Y * p.v], p.v); } });
+  if(n < 5) return null;
+  const h = shotSolve(A, B); if(!h) return null;
+  let err = 0; rows.forEach((r, k) => { const Y = Ys[k]; for(const p of r){ const X = p.c, z = h[6] * X + h[7] * Y + 1;
+    err += Math.pow((h[0] * X + h[1] * Y + h[2]) / z - p.u, 2) + Math.pow((h[3] * X + h[4] * Y + h[5]) / z - p.v, 2); } });
+  return {h, err: err / n};
+}
+function shotDetect(img, refs, force, loose){   // loose：摆正过的照片，绿色标准放宽一点（照片发灰、偏色）
+  const iw = img.naturalWidth || img.width, ih = img.naturalHeight || img.height;
+  const big = Math.max(iw, ih), sc = force || Math.min(1, 1600 / big);
+  const W = Math.round(iw * sc), H = Math.round(ih * sc), n = W * H;
+  const cv = document.createElement("canvas"); cv.width = W; cv.height = H;
+  const g2 = cv.getContext("2d", {willReadFrequently: true}); g2.imageSmoothingQuality = "high"; g2.drawImage(img, 0, 0, W, H);
+  const px = g2.getImageData(0, 0, W, H).data, lum = new Float32Array(n), green = new Uint8Array(n);
+  // 偏暗的截图（游戏里有弹窗时背景被压暗、显示器 / 截图工具偏暗）：先按最亮的那一小部分像素把整张图提亮，否则绿圈达不到亮度门槛
+  { const hist = new Uint32Array(256); for(let i = 0; i < n; i++) hist[Math.max(px[i * 4], px[i * 4 + 1], px[i * 4 + 2])]++;
+    let acc = 0, p = 255; for(let v = 255; v >= 0; v--){ acc += hist[v]; if(acc > n * 0.005){ p = v; break; } }
+    if(p < 215 && p > 20){ const gain = Math.min(3, 240 / p); for(let i = 0; i < n * 4; i++) if((i & 3) !== 3) px[i] = Math.min(255, px[i] * gain); } }
+  for(let i = 0; i < n; i++){ const r = px[i * 4], g = px[i * 4 + 1], b = px[i * 4 + 2];
+    lum[i] = 0.299 * r + 0.587 * g + 0.114 * b; green[i] = (loose ? g > 90 && g - r > 45 && b - r > 15 : g > 130 && g - r > 55 && b > 80) ? 1 : 0; }
+  const med = a => { const t = a.slice().sort((x, y) => x - y); return t[t.length >> 1]; };
+  let D, S, P, cols, ys;
+  // 绿色连通块 = 可用的盟约
+  const seen = new Uint8Array(n), blobs = [], stack = [];
+  for(let i = 0; i < n; i++){ if(!green[i] || seen[i]) continue;
+    let x0 = W, y0 = H, x1 = 0, y1 = 0, area = 0, sx = 0, sy = 0; seen[i] = 1; stack.push(i);
+    while(stack.length){ const q = stack.pop(), x = q % W, y = (q / W) | 0; area++; sx += x; sy += y;
+      if(x < x0) x0 = x; if(x > x1) x1 = x; if(y < y0) y0 = y; if(y > y1) y1 = y;
+      for(let dy = -1; dy <= 1; dy++) for(let dx = -1; dx <= 1; dx++){ const xx = x + dx, yy = y + dy;
+        if(xx < 0 || yy < 0 || xx >= W || yy >= H) continue; const t = yy * W + xx; if(green[t] && !seen[t]){ seen[t] = 1; stack.push(t); } } }
+    const w = x1 - x0 + 1, h = y1 - y0 + 1;
+    if(w >= 12 && w / h > 0.75 && w / h < 1.33 && area > 0.3 * w * h) blobs.push({cx: sx / area, cy: sy / area, w}); }
+  if(img.grid){   // 摆正过的照片：网格位置是画的时候就知道的；再按附近找到的绿圈微调每列、每行（算出来的位置会差几个像素）
+    const G = img.grid; D = G.D * sc; S = G.S * sc; P = 0; cols = G.cols.map(x => x * sc); ys = G.ys.map(y => y * sc);
+    const ok = blobs.filter(b => b.w > 0.7 * D && b.w < 1.3 * D);
+    cols = cols.map(x => { const near = ok.filter(b => Math.abs(b.cx - x) < 0.3 * S); return near.length ? med(near.map(b => b.cx)) : x; });
+    ys = ys.map(y => { const near = ok.filter(b => Math.abs(b.cy - y) < 0.3 * S); return near.length ? med(near.map(b => b.cy)) : y; });
+  } else {
+  if(blobs.length < 2) return null;
+  // 图标直径：只看大的那一批绿圈（小绿点、角标在放大后也会过门槛，混进来会把中位数拉低，真正的图标反被筛掉）
+  const wsAll = blobs.map(b => b.w).sort((x, y) => x - y), p90 = wsAll[Math.min(wsAll.length - 1, Math.floor(wsAll.length * 0.9))];
+  D = med(blobs.map(b => b.w).filter(w => w >= 0.6 * p90)); const bs = blobs.filter(b => b.w > 0.8 * D && b.w < 1.25 * D);
+  if(!force && D < 80) return shotDetect(img, refs, Math.min(sc * 96 / D, 4000 / big), loose);   // 图标太小（压缩过的图）：放大到合适的尺寸再认一遍
+  const rows = [];
+  for(const b of bs.slice().sort((x, y) => x.cy - y.cy)){ const last = rows[rows.length - 1];
+    if(last && Math.abs(last.y - b.cy) < D / 2){ last.xs.push(b.cx); last.y += (b.cy - last.y) / last.xs.length; } else rows.push({y: b.cy, xs: [b.cx]}); }
+  const diffs = [];
+  for(const r of rows){ const xs = r.xs.slice().sort((x, y) => x - y); for(let i = 1; i < xs.length; i++){ const d = xs[i] - xs[i - 1]; if(d > 1.1 * D && d < 1.8 * D) diffs.push(d); } }
+  S = diffs.length ? med(diffs) : 1.43 * D; const x0 = Math.min(...bs.map(b => b.cx)); cols = [];
+  for(let i = 0; i < 10; i++) if(x0 + i * S < W - D * 0.3) cols.push(x0 + i * S);
+  ys = rows.map(r => r.y); const pit = [];
+  for(let i = 1; i < ys.length; i++){ const d = ys[i] - ys[i - 1]; if(d > 2.0 * D && d < 2.9 * D) pit.push(d); }
+  P = pit.length ? med(pit) : 2.42 * D;
+  for(const y of ys.slice()){ const c = y + P; if(c < H - D * 0.3 && ys.every(v => Math.abs(c - v) > D / 2)) ys.push(c); }   // 整行都被禁时没有绿圆，按行距补一行
+  }
+  const rad = 0.40 * D, R = Math.ceil(rad), side = 2 * R + 1, cells = [];
+  const pct = (a, q) => a[Math.min(a.length - 1, Math.floor(a.length * q))];
+  // 摆正过的照片：第一行一定是核心盟约，下面两行一定是附加盟约，只和同一类比（模糊的图标容易被认成别的行的）
+  const KIND = new Map(DATA.bonds.map(b => [b.name, b.kind]));
+  ys.forEach((cy, ri) => { for(const cx of cols){
+    const bx = Math.round(cx) - R, by = Math.round(cy) - R, lv = [], idx = []; let gs = 0;
+    for(let y = 0; y < side; y++) for(let x = 0; x < side; x++){ const X = bx + x, Y = by + y;
+      if(X < 0 || Y < 0 || X >= W || Y >= H || (X - cx) * (X - cx) + (Y - cy) * (Y - cy) > rad * rad) continue;
+      const q = Y * W + X; idx.push(y * side + x, q); lv.push(lum[q]); gs += green[q]; }
+    if(lv.length < 50) continue;
+    const sorted = Float32Array.from(lv).sort(); let thr, on;
+    if(gs / lv.length >= 0.3){ on = true; thr = (pct(sorted, 0.03) + pct(sorted, 0.5)) / 2; }
+    else { const p50 = pct(sorted, 0.5), p98 = pct(sorted, 0.98); if(p98 - p50 < 50 || p50 < 35) continue; on = false; thr = (p50 + p98) / 2; }
+    // 照片（模糊）里绿圈的边是渐暗的，圈外的暗底会被当成图标的笔画：先量出绿圈实际到哪，只取圈里面的
+    let cut = rad * rad;
+    if(loose && on){ const nb = R + 1, gr = new Float32Array(nb), tot = new Float32Array(nb);
+      for(let i = 0; i < idx.length; i += 2){ const x = idx[i] % side - R, y = (idx[i] / side | 0) - R, k = Math.min(R, Math.round(Math.hypot(x, y))); tot[k]++; gr[k] += green[idx[i + 1]]; }
+      let edge = R; for(let k = R; k > R * 0.5; k--){ if(tot[k] && gr[k] / tot[k] >= 0.5){ edge = k; break; } }
+      cut = Math.pow(Math.max(R * 0.6, edge - 1.5), 2); }
+    const mask = new Uint8Array(side * side);
+    for(let i = 0; i < idx.length; i += 2){ const x = idx[i] % side - R, y = (idx[i] / side | 0) - R; if(x * x + y * y > cut) continue;
+      mask[idx[i]] = (on ? lum[idx[i + 1]] < thr : lum[idx[i + 1]] > thr) ? 1 : 0; }
+    const m = shotNorm(mask, side, side); if(!m) continue;
+    const top = [];
+    for(const [name, ref] of refs){ if(img.grid && KIND.get(name) !== (ri === 0 ? "core" : "extra")) continue; let a = 0, u = 0; for(let i = 0; i < m.length; i++){ a += m[i] & ref[i]; u += m[i] | ref[i]; } top.push([a / Math.max(1, u), name]); }
+    top.sort((x, y) => y[0] - x[0]); cells.push({on, top});
+  } });
+  // 每个盟约只能出现一次：按相似度从高到低分配
+  const pairs = []; cells.forEach((c, i) => c.top.slice(0, 3).forEach(t => pairs.push([t[0], i, t[1]]))); pairs.sort((x, y) => y[0] - x[0]);
+  const uc = new Set(), un = new Set(), res = {on: [], off: []};
+  const take = (i, name) => { uc.add(i); un.add(name); (cells[i].on ? res.on : res.off).push(name); };
+  for(const [sc2, i, name] of pairs){ if(sc2 < 0.45 || uc.has(i) || un.has(name)) continue; take(i, name); }
+  // 第二轮：分数没过线、但在剩下的盟约里明显只像一个的（小图、压缩过的图常见），也认
+  for(;;){ let best = null;
+    cells.forEach((c, i) => { if(uc.has(i)) return; const rest = c.top.filter(t => !un.has(t[1]));
+      if(!rest.length || rest[0][0] < 0.30 || rest[0][0] - (rest[1] ? rest[1][0] : 0) < 0.06) return;
+      if(!best || rest[0][0] > best[0]) best = [rest[0][0], i, rest[0][1]]; });
+    if(!best) break; take(best[1], best[2]); }
+  res.missing = [...refs.keys()].filter(k => !un.has(k));
+  if(window.__shotDbg) res.dbg = {D, S, P, cols: cols.map(Math.round), ys: ys.map(Math.round), cells: cells.map(c => [c.on, c.top.slice(0, 2).map(t => t[1] + ':' + t[0].toFixed(2)).join(' ')])};
+  return res;
+}
+if(window.__shotDbg) Object.assign(window.__shotDbg, {rectify: shotRectify, detect: shotDetect, refs: shotLoadRefs});   // 自测用：页面先设 window.__shotDbg = {} 才会挂出来
+function shotPick(file, how){
+  if(!file) return;
+  const url = URL.createObjectURL(file), img = new Image();
+  // 统计里记下这张图的情况（尺寸、格式、认出几个图标、是粘贴还是选的图），不传图片本身
+  const info = (n, extra) => img.naturalWidth + "x" + img.naturalHeight + " " + String(file.type || "?").replace("image/", "") + " n" + n + " " + (how || "pick") + (extra ? " " + extra : "");
+  img.onload = () => shotLoadRefs().then(refs => {
+    let res = null, err = "", how2 = ""; try{ res = shotDetect(img, refs); }catch(e){ err = "err:" + String(e && e.message || e).slice(0, 12); }
+    // 没认全（多半是手机对着屏幕拍的照片）：摆正了再认一遍，哪次认出的多用哪次
+    const got = r => r ? r.on.length + r.off.length : 0;
+    if(!res || res.missing.length){
+      for(const flip of [false, true]){ try{ const c = shotRectify(img, flip), r2 = c && shotDetect(c, refs, 0, true); if(got(r2) > got(res)){ res = r2; how2 = "rect"; } }catch(e){ err = err || "rerr:" + String(e && e.message || e).slice(0, 12); }
+        if(res && !res.missing.length) break; } }
+    URL.revokeObjectURL(url);
+    if(!res || res.on.length + res.off.length < 8){ const inf = info(res ? res.on.length + res.off.length : 0, err); stat("shot_fail", inf); shotFail = {file: file, info: inf, state: ""}; shotNote = ["", "没认出来，要截有「核心盟约」「附加盟约」两栏的那一页（不是「本局禁用干员」那页）"]; return showBan(); }
+    stat("shot_ok", res.off.length + " " + info(res.on.length + res.off.length, how2)); shotFail = null;
+    banned = new Set(res.off.filter(b => BONDS.has(b)));
+    if(banned.has(filter.core)) filter.core = null; if(banned.has(filter.extra)) filter.extra = null;
+    saveBan(); renderFilters(); render();
+    shotNote = res.missing.length ? ["warn", "已识别，禁用 " + banned.size + " 个；没认出：" + res.missing.join("、")] : ["ok", "已识别，禁用 " + banned.size + " 个"];
+    showBan();
+  });
+  img.onerror = () => { URL.revokeObjectURL(url); stat("shot_fail", "badimg " + String(file.type || "?").replace("image/", "") + " " + Math.round(file.size / 1024) + "KB " + (how || "pick")); toast("图片打不开"); };
+  img.src = url;
+}
+
+function showBan(){
+  const grp = (kind, title) => '<h4>' + title + '</h4><div class="chips banchips">' +
+    DATA.bonds.filter(b => b.kind === kind && (b.membersFromDb || []).length).map(b =>
+      '<button class="chip core' + (banned.has(b.name) ? " ban" : "") + '" data-ban="' + esc(b.name) + '">' + bondIcon(b.name) + esc(b.name) + '</button>').join("") + '</div>';
+  const nOut = DATA.operators.filter(isOut).length;
+  const keep = sameView("ban") ? $("sheet").scrollTop : 0;
+  setView("ban", showBan);
+  openSheet('<div class="head"><div><h2>本局禁用</h2><div class="meta">点一下划掉，再点恢复</div></div>' +
+    '<button class="x" data-close="1" aria-label="关闭">✕</button></div>' +
+    '<div class="acts" style="margin:0 0 6px"><button class="btn primary" data-shot="1">' + (isMobile() ? "截图识别（开局盟约页）" : "截图识别（开局盟约页，选图或直接 Ctrl+V 粘贴）") + '</button></div>' +
+    (shotNote ? '<div class="banbox ' + shotNote[0] + '">' + esc(shotNote[1]) +
+      (shotFail ? '　' + (shotFail.state === "sent" ? '截图已发给作者' : shotFail.state === "sending" ? '发送中…' :
+        '<button class="lnk" data-shotsend="1">' + (shotFail.state === "error" ? '没发出去，再试一次' : '把这张截图发给作者') + '</button>') : "") + '</div>' : "") +
+    grp("core", "核心盟约") + grp("extra", "附加盟约") +
+    '<div class="fx" style="margin-top:12px"><b>已禁 ' + banned.size + ' 个盟约，' + nOut + ' / ' + DATA.operators.length + ' 名干员不会出现</b></div>' +
+    (BUILDS.length && banned.size ? (c => '<div class="banbox ' + (c[0] ? "ok" : "warn") + '" style="margin-top:10px">阵容推荐：<b>能打 ' + c[0] + '</b> · 受影响 ' + c[1] + ' · 核心被禁 ' + c[2] + '　<button class="lnk" data-buildlist="1">去看</button></div>')(banCount()) : "") +
+    '<div class="acts"><button class="btn" data-banreset="1">全部恢复</button><button class="btn primary" data-close="1">完成</button></div>' +
+    (EXTDATA.rules.fixedBans || []).map((g, i) => '<div style="margin-top:10px"><button class="lnk" data-banfixed="' + i + '">低难度（标准、极速、规程 1–4）一键划掉固定的 ' + g.bonds.length + ' 个</button></div>').join(""));
+  $("sheet").scrollTop = keep;
+}
+
+function showAllBonds(){
+  setView("allbonds", showAllBonds);
+  openSheet('<div class="head"><div><h2>全部盟约</h2><div class="meta">点一个看效果全文</div></div><button class="x" data-close="1" aria-label="关闭">✕</button></div>' + $("bondList").innerHTML);
+}
+
+/* ---------- 事件 ---------- */
+let suppressClick = false, pressTimer = 0;
+
+document.addEventListener("click", e => {
+  if(suppressClick){ suppressClick = false; e.preventDefault(); return; }
+  const t = e.target;
+  let el;
+  if(t.closest("[data-back]")) return sheetBack();
+  if(t === $("mask") || t.closest("[data-close]")) return closeSheet();
+  if((el = t.closest("[data-bvtab]"))){ const v = buildViews.get(curBuild); if(v) v.tab = el.dataset.bvtab; return showBuild(curBuild, "tab"); }
+  if((el = t.closest("[data-bvstage]"))){ const v = buildViews.get(curBuild); if(v) v.stage = +el.dataset.bvstage; return showBuild(curBuild, "tab"); }
+  if(t.closest("[data-buildlist]")) return showBuilds("guide");
+  if(t.closest("[data-fbopen]")) return showFeedback();
+  if((el = t.closest("[data-fbkind]"))){ fbKeep(); fbDraft.k = fbDraft.k === el.dataset.fbkind ? "" : el.dataset.fbkind; return showFeedback(); }
+  if(t.closest("[data-fbsend]")) return fbSending ? undefined : sendFeedback();
+  if((el = t.closest("[data-btab]"))) return showBuilds(el.dataset.btab);
+  if(t.closest("[data-minenew]")){ if(!(lineup.length + extFielded().length)) return;
+    mineDraft = cleanPack({n: "我的阵容 " + (mine.length + 1), o: lineup.slice(), x: extFielded().map(n => [n, extTier(n)])}); return showMineEdit("new"); }
+  if((el = t.closest("[data-minesavefrm]"))){ const id = el.dataset.minesavefrm, m = id === "new" ? mineDraft : mine.find(x => x.id === id);
+    if(m){ m.n = $("mName").value.trim().slice(0, 30) || "未命名"; m.t = $("mNote").value.slice(0, 2000);
+      if(id === "new"){ mine.unshift(m); mineDraft = null; } saveMine(); toast("已保存");
+      const send = $("mSend").checked; ui.send = send; try{ localStorage.setItem(UI_KEY, JSON.stringify(ui)); }catch(e){}
+      if(send) sendPack(m); }
+    return showBuilds("mine"); }
+  if((el = t.closest("[data-mineload]"))){ const m = mine.find(x => x.id === el.dataset.mineload);
+    if(m && (!(lineup.length + extFielded().length) || confirm("替换当前阵容区？"))){ loadPack(m); closeSheet(); } return; }
+  if((el = t.closest("[data-mineshare]"))){ const m = mine.find(x => x.id === el.dataset.mineshare); if(m) copyText(shareUrl(m), "链接已复制"); return; }
+  if((el = t.closest("[data-mineedit]"))) return showMineEdit(el.dataset.mineedit);
+  if((el = t.closest("[data-minedel]"))){ const m = mine.find(x => x.id === el.dataset.minedel);
+    if(m && confirm("删除「" + m.n + "」？")){ mine = mine.filter(x => x !== m); saveMine(); showBuilds("mine"); } return; }
+  if(t.closest("[data-sharedload]")){ if(incoming && (!(lineup.length + extFielded().length) || confirm("替换当前阵容区？"))){ loadPack(incoming); incoming = null; closeSheet(); } return; }
+  if(t.closest("[data-sharedsave]")){ if(incoming){ mine.unshift(cleanPack({n: incoming.n, o: incoming.o, x: incoming.x, t: incoming.t})); saveMine(); incoming = null; toast("已保存"); return showBuilds("mine"); } return; }
+  if((el = t.closest("[data-buildopen]"))) return showBuild(el.dataset.buildopen);
+  if((el = t.closest("[data-buildon]"))){ stat("build_on", el.dataset.buildon); setBuild(el.dataset.buildon); return closeSheet(); }
+  if(t.closest("[data-buildoff]")){ setBuild(null); return $("mask").classList.contains("show") && curBuild ? showBuild(curBuild, true) : undefined; }
+  if((el = t.closest("[data-buildfill]"))){ const b = BUILDS.find(x => x.id === curBuild), st = b && b.stages[+el.dataset.buildfill];
+    if(st && (!lineup.length || confirm("用这一阶段的阵容替换当前阵容区？"))){ stat("build_fill", b.id); lineup = st.ops.filter(n => OPS.has(n) && !isOut(OPS.get(n))); save(); if(activeBuild !== b.id) setBuild(b.id); else render(); closeSheet(); } return; }
+  if(t.closest("[data-extback]")) return showExtPanel();
+  if((el = t.closest("[data-extdel]"))){ extDel(el.dataset.extdel); return showExtPanel(); }
+  if((el = t.closest("[data-extaddto]"))){ extAdd(el.dataset.name, +el.dataset.extaddto) || alert("这一阶的自选位满了。"); return showExtPanel(); }
+  if((el = t.closest("[data-extpick]"))) return showExtPick(+el.dataset.extpick);
+  if((el = t.closest("[data-extbond]"))){ extPick.bond = el.dataset.extbond || null;
+    document.querySelectorAll("#extBonds .chip").forEach(c => c.classList.toggle("on", (c.dataset.extbond || null) === extPick.bond));
+    return $("extList").innerHTML = extPickList(); }
+  if((el = t.closest("[data-info]")) && EXTS.has(el.dataset.info)){ e.stopPropagation(); return showExtOp(el.dataset.info); }
+  if((el = t.closest("[data-extadd]"))){ extAdd(el.dataset.extadd, extPick.tier); return showExtPanel(); }
+  if((el = t.closest("[data-extfield]"))){ extToggleField(el.dataset.extfield); return showExtPanel(); }
+  if((el = t.closest("[data-ban]"))){ const b = el.dataset.ban; banned.has(b) ? banned.delete(b) : banned.add(b);
+    if(filter.core === b) filter.core = null; if(filter.extra === b) filter.extra = null;
+    saveBan(); renderFilters(); render(); return showBan(); }
+  if((el = t.closest("[data-banfixed]"))){ ((EXTDATA.rules.fixedBans || [])[+el.dataset.banfixed] || {bonds: []}).bonds.forEach(b => { if(BONDS.has(b)) banned.add(b); });
+    if(banned.has(filter.core)) filter.core = null; if(banned.has(filter.extra)) filter.extra = null;
+    saveBan(); renderFilters(); render(); return showBan(); }
+  if(t.closest("[data-banreset]")){ banned.clear(); saveBan(); renderFilters(); render(); return showBan(); }
+  if(t.closest("[data-banopen]")){ shotNote = null; shotFail = null; return showBan(); }
+  if(t.closest("[data-shotsend]")) return sendShot();
+  if(t.closest("[data-shot]")){ $("shotFile").value = ""; return $("shotFile").click(); }
+  if(t.closest("[data-showout]")){ showOut = !showOut; return renderPool(); }
+  if((el = t.closest("[data-info]"))){ e.stopPropagation(); return showOp(el.dataset.info); }
+  if((el = t.closest("[data-toggle]"))){ toggle(el.dataset.toggle); return sheetStack.length ? sheetBack() : closeSheet(); }
+  if((el = t.closest("[data-filter]"))){ const fb = BONDS.get(el.dataset.filter); filter.core = filter.extra = filter.fn = null; filter.when = []; filter[fb.kind] = fb.name;
+    renderFilters(); renderPool(); closeSheet();
+    return $("pool").scrollIntoView({behavior: "smooth", block: "start"}); }
+  if(t.closest("[data-allbonds]")) return showAllBonds();
+  if((el = t.closest("[data-bond]"))) return showBond(el.dataset.bond);
+  if((el = t.closest("[data-ui]"))){ const k = el.dataset.ui, open = k === "fn" ? (uiOpen("fn") || !!filter.fn || !!filter.when.length) : uiOpen(k);
+    ui[k] = !open; if(k === "fn" && open){ filter.fn = null; filter.when = []; }
+    try{ localStorage.setItem(UI_KEY, JSON.stringify(ui)); }catch(e){}
+    renderFilters(); return renderPool(); }
+  if((el = t.closest("[data-f]"))){ const g = el.dataset.g, v = el.dataset.f || null;
+    if(g === "when") filter.when = !v ? [] : filter.when.includes(v) ? filter.when.filter(x => x !== v) : filter.when.concat(v);   // 触发可多选，点「全部」清空
+    else filter[g] = filter[g] === v ? null : v;   // 再点一次已选中的 = 取消
+    renderFilters(); return renderPool(); }
+  if((el = t.closest(".op"))){
+    const name = el.dataset.op, from = el.dataset.from;
+    if(from === "sheet"){ toggle(name); const b = $("sheet").querySelector("[data-filter]"); return b ? showBond(b.dataset.filter) : closeSheet(); }
+    if(from === "build"){ toggle(name); return showBuild(curBuild, true); }
+    if(from === "extteam"){ ext.on = ext.on.filter(n => n !== name); saveExt(); return render(); }
+    return from === "team" ? remove(name) : toggle(name);
+  }
+});
+
+// 右键（电脑）/ 长按（安卓会触发 contextmenu）看特质
+document.addEventListener("contextmenu", e => {
+  const el = e.target.closest(".op"); if(!el) return;
+  e.preventDefault(); clearTimeout(pressTimer);
+  if(e.pointerType === "touch" || isMobile()) suppressClick = true;
+  showOp(el.dataset.op);
+});
+// iOS 不触发 contextmenu，自己计时
+document.addEventListener("touchstart", e => {
+  const el = e.target.closest(".op"); if(!el) return;
+  clearTimeout(pressTimer);
+  pressTimer = setTimeout(() => { suppressClick = true; showOp(el.dataset.op); setTimeout(() => suppressClick = false, 800); }, 480);
+}, {passive: true});
+["touchend", "touchmove", "touchcancel"].forEach(ev => document.addEventListener(ev, () => clearTimeout(pressTimer), {passive: true}));
+document.addEventListener("keydown", e => { if(e.key === "Escape") closeSheet(); });
+
+// 拖拽（电脑）
+document.addEventListener("dragstart", e => {
+  const el = e.target.closest && e.target.closest(".op"); if(!el) return;
+  e.dataTransfer.setData("text/plain", el.dataset.op);
+  e.dataTransfer.setData("application/x-from-" + el.dataset.from, "1");
+  e.dataTransfer.effectAllowed = "move";
+});
+function dropZone(el, accept, onDrop){
+  el.addEventListener("dragover", e => { if(e.dataTransfer.types.includes(accept)){ e.preventDefault(); el.classList.add("over"); } });
+  el.addEventListener("dragleave", e => { if(!el.contains(e.relatedTarget)) el.classList.remove("over"); });
+  el.addEventListener("drop", e => { e.preventDefault(); el.classList.remove("over"); onDrop(e.dataTransfer.getData("text/plain")); });
+}
+dropZone($("teamGrid"), "application/x-from-pool", add);
+dropZone($("pool"), "application/x-from-team", remove);
+
+$("q").addEventListener("input", e => { query = e.target.value.trim(); renderPool(); });
+$("banBtn").addEventListener("click", () => { shotNote = null; shotFail = null; showBan(); });
+$("shotFile").addEventListener("change", e => shotPick(e.target.files[0]));
+// 电脑上：在页面任何地方 Ctrl+V 粘贴截图，直接识别并打开「本局禁用」
+document.addEventListener("paste", e => {
+  const cd = e.clipboardData; if(!cd) return;
+  const f = [...(cd.files || [])].find(x => x.type.startsWith("image/")) ||
+    [...(cd.items || [])].filter(i => i.kind === "file" && i.type.startsWith("image/")).map(i => i.getAsFile()).find(Boolean);
+  if(f){ e.preventDefault(); shotNote = null; shotPick(f, "paste"); }
+});
+$("extBtn").addEventListener("click", showExtPanel);
+$("buildBtn").addEventListener("click", () => showBuilds());
+if(!BUILDS.length) $("buildBtn").style.display = "none";
+if(!EXTDATA.operators.length) $("extBtn").style.display = "none";
+document.addEventListener("input", e => { if(e.target.id === "fbText" || e.target.id === "fbContact") fbKeep(); });
+document.addEventListener("input", e => { if(e.target.id === "extQ"){ extPick.q = e.target.value.trim(); $("extList").innerHTML = extPickList(); } });
+$("clearBtn").addEventListener("click", () => { if(lineup.length && confirm("清空当前阵容？")){ lineup = []; save(); render(); } });
+matchMedia("(max-width: 820px)").addEventListener("change", () => { renderFilters(); render(); });
+
+$("hintTop").textContent = DATA.bonds.length + " 个盟约 · " + DATA.operators.length + " 名干员";
+if(window.SWEEP_INDEX) $("legend").innerHTML =
+  '<span><span class="kmark inl">K</span>key 牌</span>' +
+  '<span><span class="bdg stk s3"><i></i><i></i><i></i></span><span class="bdg stk s2"><i></i><i></i><i></i></span><span class="bdg stk s1"><i></i><i></i><i></i></span>叠层：核心 / 中等 / 过渡</span>' +
+  '<span><span class="bdg coin c3">¥</span><span class="bdg coin c2">¥</span><span class="bdg coin c1">¥</span>给钱：核心 / 中等 / 过渡</span>' +
+  FEAT.map(f => '<span>' + featBadge(f[0], f[1]) + f[0] + '</span>').join("") +
+  WHEN_MARK.map(m => '<span><span class="whm inl ' + m[2] + '">' + m[1] + '</span>' + m[0] + '</span>').join("") +
+  (IDX.skillSources ? '<span><span class="skm inl">2</span>推荐带几技能（<span class="skm inl split">2/3</span> = 有分歧）</span>' : "");
+(function(){
+  const seen = new Map();   // UP 主 -> 引用的第一条视频
+  const add = x => { if(x && x.author && x.bvid && !seen.has(x.author)) seen.set(x.author, x.bvid); };
+  BUILDS.forEach(b => add(b.source));
+  Object.values(IDX.skillSources || {}).forEach(add);
+  Object.values(IDX.community || {}).forEach(add);
+  (IDX.keySources || []).forEach(add);
+  const ups = [...seen].map(([a, bv]) => '<a class="lnk" target="_blank" rel="noopener" href="https://www.bilibili.com/video/' + esc(bv) + '">' + esc(a) + '</a>').join("、");
+  $("about").innerHTML = '<p><b>出处</b>　数据：<a class="lnk" target="_blank" rel="noopener" href="https://prts.wiki/">PRTS wiki</a>（CC BY-NC-SA）、游戏数据。' + (ups ? '攻略：' + ups + '。' : "") + '</p>' +
+    '<p><b>声明</b>　非官方玩家工具，免费。游戏素材版权归上海鹰角网络科技有限公司。保存阵容时勾选「发给作者」的内容、截图没认出时点「发给作者」的截图会匿名上传。打开页面时会匿名记录访问来源、使用时长和用了哪些功能，不含 IP 和浏览器信息。反馈：<button class="lnk" data-fbopen="1">意见反馈</button>、<a class="lnk" target="_blank" rel="noopener" href="https://github.com/dazauzai/ak-sweep/issues">GitHub</a></p>';
+})();
+renderFilters(); render();
+// 从资料库点「反馈」过来（#feedback）：直接打开反馈
+if(location.hash === "#feedback"){ try{ history.replaceState(null, "", location.pathname + location.search); }catch(e){} showFeedback(); }
+// 打开的是别人发来的分享链接（#s=…）：弹出来给他看，网址里的参数随手清掉
+(function(){
+  const m = /^#s=([A-Za-z0-9_-]+)$/.exec(location.hash); if(!m) return;
+  try{ const d = JSON.parse(b64d(m[1])); incoming = cleanPack({n: d.n, o: d.o, x: d.x, t: d.t}); }catch(e){ incoming = null; }
+  try{ history.replaceState(null, "", location.pathname + location.search); }catch(e){}
+  if(incoming && (incoming.o.length + incoming.x.length)) showShared(); else incoming = null;
+})();
+})();
+</script>
+</body>
+</html>
